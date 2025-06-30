@@ -18,9 +18,8 @@ const { sendVerificationEmail, sendPasswordResetEmail } = require('../utils/Emai
 
 // Mock the authorize middleware for testing purposes
 jest.mock('../middleware/authorize', () => ({
-    checkNotAuthenticated: jest.fn((req, res, next) => next()), // Always allow for tests
+    checkNotAuthenticated: jest.fn((req, res, next) => next()),
     authenticateToken: jest.fn((req, res, next) => {
-        // A simplified mock for authenticateToken - in real tests, you'd decode a mock token
         req.user = { userId: 'mockUserId', usertype: 'user' };
         next();
     }),
