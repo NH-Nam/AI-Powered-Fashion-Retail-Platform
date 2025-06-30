@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <base href="/public">
+   <%- include('css') %>
+   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css" />
+    <style>
+        .inner_page_head {
+            margin-bottom: 50px;
+        }
+    </style>
+  <!-- sidebar + content -->
+  <div class="hero_area">
+    <%- include('header') %>
+
+    <!-- inner page section -->
+    <section class="inner_page_head">
+        <div class="container-fluid">
+           <div class="row">
+              <div class="col-md-12">
+                 <div class="full">
+                    <h3>My Favorite Products</h3>
+                 </div>
+              </div>
+           </div>
+        </div>
+     </section>
+  <section class="">
+    <div class="container">
+      <div class="row">
+        <!-- sidebar -->
+        <!-- content -->
+        <div class="col-lg-12">
+        
+        <% if(favorite.length > 0 ) { for(item of favorite) {%>
+          <div class="row justify-content-center mb-3">
+            <div class="col-md-12">
+              <div class="card shadow-0 border rounded-3">
+                <div class="card-body">
+                  <div class="row g-0">
+                    <div class="col-xl-3 col-md-4 d-flex justify-content-center">
+                      <div class="bg-image hover-zoom ripple rounded ripple-surface me-md-3 mb-3 mb-md-0">
+                        <a href="/product_details/<%=item.product_id._id%>"><img src="<%= item.product_id.image%>" class="w-100" /></a>
+                        <a href="#!">
+                          <div class="hover-overlay">
+                            <div class="mask" style="background-color: rgba(253, 253, 253, 0.15);"></div>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                    <div class="col-xl-6 col-md-5 col-sm-7">
+                      <a href="/product_details/<%=item.product_id._id%>" style="color: #000;"><h5><%= item.product_id.title%></h5></a>
+                      <div class="d-flex flex-row">
+                        <div class="text-warning mb-1 me-2">
+                          <i class="fa fa-star"></i>
+                          <i class="fa fa-star"></i>
+                          <i class="fa fa-star"></i>
+                          <i class="fa fa-star"></i>
+                          <i class="fas fa-star-half-alt"></i>
+                          <span class="ms-1">
+                            4.5
+                          </span>
+                        </div>
+                      </div>
+                      <p class="text mb-4 mb-md-0">
+                        <%- item.product_id.description %>
+                      </p>
+                    </div>
+                    <div class="col-xl-3 col-md-3 col-sm-5">
+                      <div class="d-flex flex-row align-items-center mb-1">
+                        <h4 class="mb-1 me-1"> <%= (item.product_id.discount_price > 0) ? numberFormat(item.product_id.discount_price) : numberFormat(item.product_id.price) %> VNDC</h4>
+                        <span class="text-danger"><s><%= numberFormat(item.product_id.price) %> VNDC</s></span>
+                      </div>
+                      <h6 class="text-success">Free shipping</h6>
+                      <div class="mt-4 d-flex justify-content-start align-items-center">
+                       <form action="/addcart/<%= item.product_id._id %>" method="POST">
+                        <input type="number" name="quantity" value="1" min="1" style="width:100px;" hidden>
+                        <button class="btn btn-primary" type="submit" style="margin-right:2px;"
+                           <%if(item.product_id.quantity > 0){%>
+                              onclick="addToCart()"
+                           <%}else {%>
+                              onclick="checkQuantity()"
+                           <%}%>
+                        >Buy this</button></form>
+                        <a href="/favorite/delete/<%= item._id%>" class="btn btn-light border px-2 pt-2 icon-hover" onclick="return showDeleteAlert('<%= item._id%>')""><i class="fas fa-heart fa-lg px-1"></i></a>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% } }else if(favorite.length ==0){%>
+          <h3 style="text-align: center; margin: 10px 0;">You have not favorited a product on this page</h3>
+        <%}%>
+  
+          <hr />
+  
+          <!-- Pagination -->
+                <div class="pagination justify-content-center" style="margin-bottom: 50px;">
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                       <a href="favorite?page=<%= i %>" class="<%= i === page ? 'active' : '' %>"><%= i %></a>
+                     <% } %>
+                </div>
+          <!-- Pagination -->
+        </div>
+      </div>
+    </div>
+  </section>
+  </div>
+     <!-- footer start -->
+     <%- include('footer') %>
+     <!-- footer end -->
+     <script>
+        function showDeleteAlert(favoriteId) {
+        Swal.fire({
+            title: 'Are you sure to delete this item?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, keep it'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Thực hiện hành động khi xác nhận
+                window.location.href = "/favorite/delete/" + favoriteId;
+            }
+        });
+        return false; // Ngăn chặn hành động mặc định của nút "Cancel"
+    }
+
+    function addToCart() {
+            // event.preventDefault();
+            Swal.fire({
+               title: 'Product addded successfully!',
+               icon: 'success',
+               confirmButtonText: 'OK'
+            }).then((result) => {
+               if (result.isConfirmed) {
+                  window.location.reload();
+               }
+            });
+    }
+
+   function checkQuantity() {
+      event.preventDefault();
+      Swal.fire({
+         title: 'Sorry You😭😭😭!!!',
+         text: 'This product is out of stock!!!',
+         icon: 'warning',
+         confirmButtonText: 'OK',
+      })
+   }
+     </script>

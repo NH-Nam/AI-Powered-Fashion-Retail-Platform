@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <base href="/public">
+   <%- include('css') %>
+   <script src="dist/sweetalert.min.js"></script>
+<link rel="stylesheet" type="text/css" href="dist/sweetalert.css">
+   <style>
+      .evaluate{
+         margin-left: 20px; 
+         border-left: solid #dad7d7 1px; 
+         font-size: 13pt; 
+         padding-top: 3px; 
+         padding-left: 20px;
+      }
+      .btnAdd{
+         margin-top: 20px; 
+         width: 100%; 
+         font-size: 30px;
+      }
+      .card-inner {
+        margin-left: 4rem;
+      }
+
+      .img-account-profile {
+        height: 10rem;
+        border: 1px solid #000;
+        border-radius: 50%;
+        height: 150px;
+        width: 150px;
+      }
+      @media(max-width:380px) {
+         .fillComment {
+            height: 10px;
+            width: 70vw;
+         }
+
+         .allComment {
+            padding-left: 20%;
+            font-size: 20px;
+         }
+         .evaluate{
+            margin-left: 5px;
+            font-size: 9pt;
+            padding-left: 6px;
+         }
+         .bi-star-fill, .fa-star{
+            height: 12px;
+            width: 12px;
+         }
+         .btnAdd{
+            font-size:20px;
+         }
+         .img-account-profile{
+            height: 100px;
+            width: 100px;
+         }
+         p strong{
+            font-size: 15px;
+         }
+         .card-inner {
+            margin-left: 2rem;
+         }
+      }
+   </style>
+</head>
+
+<body>
+   <div class="hero_area">
+    <%- include('header') %>
+
+      <section class="product_section layout_padding">
+         <div class="container">
+            <div class="row">
+               <div class="col-md-6 text-center">
+                  <div class="border rounded-4 mb-3 d-flex justify-content-center">
+                       <img style="max-width: 100%; max-height: 60vh; margin: auto;" class="rounded-4 fit" src="<%= product.image %>" />
+                   </div>
+               </div>
+               <div class="col-md-6">
+                  <h3><%= product.title %></h3>
+                  <!-- show 5 stars -->
+                  <ul style="display: flex; list-style-type: none; margin: 0px; padding: 0px;">
+                     <li style="color: orange; font-size: 13pt; padding-top: 2px; margin-right: 5px;" class="evaluate">5.0</li>
+                     <% for(let i = 0; i <5 ; i++) { %>
+                     <li style="color: orange; padding: 2px;">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-star-fill" viewBox="0 0 16 16">
+                                 <path
+                                    d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z">
+                                 </path>
+                              </svg>
+                    </li>
+                     <% } %>
+
+                     <li class="evaluate">
+                        <%= replies.length+comments.length%> Evaluate
+                     </li>
+                     <li class="evaluate">
+                        <%= orders.length%> Sold
+                     </li>
+                  </ul>
+                  <p style="color: red; font-size: 30px; margin-top: 15px; margin-bottom: 15px;">
+                    <%= (product.discount_price > 0) ? numberFormat(product.discount_price) : numberFormat(product.price) %> VNDC</p>
+                  <p
+                     style="color: grey; font-size: 15px; margin-top: 15px; margin-bottom: 15px; text-decoration: line-through;">
+                     <del><%= numberFormat(product.price) %> VNDC</del>
+                  </p>
+                  <div class="d-flex flex-container">
+                     <form id="quantity-form" style="display:inline-block;" action="/add_cart/<%= product._id%>" method="POST" ></form>
+                     <div>
+                        <button class="btn btn-light" style="border: 1px solid #e0dede; border-radius: 0px;"
+                           onclick="addMoreCart(-1)">-</button>
+                     </div>
+                     <div>
+                           <input type="number" name="quantity" class="form-control" step=1 value="1" style="max-width:70px; 
+            border: 1px solid #e0dede; border-radius: 0px; text-align: center;" onchange="fixCartNum()">
+                     </div>
+                     <div>
+                        <button class="btn btn-light" style="border: 1px solid #e0dede; border-radius: 0px;"
+                           onclick="addMoreCart(1)">+</button>
+                     </div>
+                     <div>
+                        <p style="margin: 8px 0px 10px 10px;"><strong>Number</strong>: <% if(product.quantity > 0) { %> <%= product.quantity%> products <% }else { %><label style="color: red; font-weight: 500;">Out of stock</label><%}%></p>
+                    </div>
+                  </div>
+                  <button class="btn btn-success btnAdd" 
+                        <% if(token != null) { %>
+                        data-product-quantity="<%= product.quantity %>" onclick="handleAddToCart(this)">
+                        <% } else { %>
+                        onclick="checkToken()">
+                        <% } %>
+                     <i class="bi bi-cart4"></i> ADD TO CART
+                  </button>
+                  </form>
+                  <% if(token != null) {%>
+                     <% if(!favorite) {%>
+                        <form action="/favorite/<%= product._id%>" method="POST">
+                           <button class="btn btn-secondary btnAdd" onclick="Favorite()"
+                           style="background: #edebeb; border: none; color: #000;">
+                           <i class="bi bi-bookmark-heart-fill"></i> ADD TO LOVE
+                        </button>
+                        </form>
+                     <%} else {%>
+                        <button class="btn btn-secondary btnAdd" onclick="checkFavorite()"
+                           style="background: #edebeb; border: none; color: #000;">
+                           <i class="bi bi-bookmark-heart-fill"></i> ADD TO LOVE
+                        </button>
+                     <%}%>
+                  <%}else{%>
+                     <button class="btn btn-secondary btnAdd" onclick="checkToken()"
+                     style="background: #edebeb; border: none; color: #000;">
+                     <i class="bi bi-bookmark-heart-fill"></i> ADD TO LOVE</button>
+                  <%}%>
+               </div>
+               <div class="col-md-12" style="margin-top: 50px;">
+                  <h4>Product Description</h4>
+                  <%- product.description %>
+               </div>
+               <div class="col-md-12">
+                  <h4 style="text-align:center;">Related Products</h4>
+               </div>
+               <% for ( let item of productList) { %>
+               <div class="col-sm-6 col-md-4 col-lg-4">
+                  <div class="box">
+                     <div class="option_container">
+                        <div class="options">
+                           <a href="/product_details/<%=item.id%>" class="option1">
+                            <%= item.title%>
+                           </a>
+                           <form action="/add_cart/<%=item.id%>" method="POST">
+                              <input type="number" name="quantity" value="1" min="1" style="width:100px;" hidden>
+                              <input type="submit" value="Buy Now" class="option2" style="border-radius: 30px;">
+                           </form>
+                        </div>
+                     </div>
+                     <div class="img-box">
+                        <img src="<%=item.image%>" alt="">
+                     </div>
+                     <div class="detail-box">
+                        <h5>
+                            <%=item.title%>
+                        </h5>
+
+                        <% if(item.discount_price > 0) {%>
+                        <h6 style="color:red;">
+                        Discount</br>
+                        <%= numberFormat(item.discount_price)%>
+                        </h6>
+                        
+                        <h6 style="text-decoration:line-through;">
+                        Price</br>
+                        <%= numberFormat(item.price)%>
+                        </h6>
+                        <% } else {%>
+
+                        <h6>
+                        Price</br>
+                        <%= item.price%>
+                        </h6>
+
+                        <% } %>
+                     </div>
+                  </div>
+               </div>
+               <% } %>
+
+            </div>
+         </div>
+      </section>
+
+   </div>
+
+   <!-- end client section -->
+   <!-- comment section -->
+   <%- include('comment_reply') %>
+   <!-- end comment section -->
+   <!-- footer start -->
+   <%- include('footer') %>
+   <!-- footer end -->
+</body>
+
+<script type="text/javascript">
+   function addToCart() {
+      event.preventDefault();
+      var quantity = document.querySelector('[name=quantity]').value;
+      var productId = '<%= product._id %>'; // Thay thế với ID sản phẩm thực tế
+      // Gửi dữ liệu đến server bằng AJAX
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/add_cart/" + productId, true);
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xhr.onreadystatechange = function() {
+         if (this.readyState == 4 && this.status == 200) {
+            // Xử lý phản hồi từ server
+            event.preventDefault();
+            Swal.fire({
+               title: 'Product addded successfully!',
+               icon: 'success',
+               confirmButtonText: 'OK'
+            }).then((result) => {
+               if (result.isConfirmed) {
+                  window.location.reload();
+               }
+            });
+         }
+      };
+      xhr.send("quantity=" + quantity);
+   }
+
+   function addMoreCart(delta) {
+      event.preventDefault(); // Ngăn chặn hành động mặc định
+      var num = parseInt(document.querySelector('[name=quantity]').value);
+      num += delta;
+      if (num < 1) num = 1;
+      document.querySelector('[name=quantity]').value = num;
+   }
+
+
+   function fixCartNum() {
+      $('[name=quantity]').val(Math.abs($('[name=quantity]').val()));
+   }
+
+   function checkQuantity() {
+      Swal.fire({
+         title: 'Sorry You😭😭😭!!!',
+         text: 'The product quantity is not enough to fulfill your requirement!!!',
+         icon: 'warning',
+         confirmButtonText: 'OK',
+      })
+   }
+
+   function handleAddToCart(button) {
+    var productQuantity = parseInt(button.getAttribute('data-product-quantity'));
+    var requestedQuantity = parseInt(document.querySelector('[name=quantity]').value);
+
+      if (requestedQuantity > productQuantity) {
+         // Hiển thị thông báo nếu số lượng yêu cầu lớn hơn số lượng có sẵn
+         checkQuantity();
+      } else {
+         // Thêm vào giỏ hàng nếu số lượng đủ
+         addToCart();
+      }
+   }
+
+   function Favorite() {
+      Swal.fire({
+         title: 'Add Successfully',
+         text: 'The product has been added to favorites!',
+         icon: 'success',
+         confirmButtonText: 'OK',
+      })
+   }
+
+   function checkFavorite() {
+      Swal.fire({
+         title: 'Unsuccessfully',
+         text: 'You have previously added this product to your favorites!',
+         icon: 'warning',
+         confirmButtonText: 'OK',
+      })
+   }
+
+</script>
+
+</html>

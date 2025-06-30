@@ -1,0 +1,49 @@
+<% path="" %>
+<section class="product_section layout_padding">
+   <div class="container">
+      <div class="heading_container heading_center">
+         <h2>
+            Our <span>products</span>
+         </h2>
+      </div>
+      <%- include('view_product') %>
+      <div class="btn-box">
+         <a href="/products">
+            View All products
+         </a>
+      </div>
+   </div>
+</section>
+<script>
+   document.addEventListener("DOMContentLoaded", function (event) {
+      var scrollpos = localStorage.getItem('scrollpos');
+      if (scrollpos) window.scrollTo(0, scrollpos);
+   });
+
+   window.onbeforeunload = function (e) {
+      localStorage.setItem('scrollpos', window.scrollY);
+   };
+
+   function addToCart() {
+           // event.preventDefault();
+           Swal.fire({
+              title: 'Product addded successfully!',
+              icon: 'success',
+              confirmButtonText: 'OK'
+           }).then((result) => {
+              if (result.isConfirmed) {
+                 window.location.reload();
+              }
+           });
+  }
+
+  function checkQuantity() {
+     event.preventDefault();
+     Swal.fire({
+        title: 'Sorry You😭😭😭!!!',
+        text: 'This product is out of stock!!!',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+     })
+  }
+</script>

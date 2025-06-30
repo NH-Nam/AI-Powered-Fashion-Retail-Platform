@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base href="/public">
+        <%- include('css') %>
+            <style>
+                body {
+                    margin-top: 20px;
+                    background-color: #f2f6fc;
+                    color: #69707a;
+                }
+
+                .img-account-profile {
+                    height: 10rem;
+                    border: 2px solid #000;
+                    border-radius: 50%;
+                    height: 155px;
+                    width: 155px;
+                    background: url('themes/frontend/images/user.png');
+                }
+
+                .rounded-circle {
+                    border-radius: 50% !important;
+                }
+
+                .card {
+                    box-shadow: 0 0.15rem 1.75rem 0 rgb(33 40 50 / 15%);
+                }
+
+                .card .card-header {
+                    font-weight: 500;
+                }
+
+                .card-header:first-child {
+                    border-radius: 0.35rem 0.35rem 0 0;
+                }
+
+                .card-header {
+                    padding: 1rem 1.35rem;
+                    margin-bottom: 0;
+                    background-color: rgba(33, 40, 50, 0.03);
+                    border-bottom: 1px solid rgba(33, 40, 50, 0.125);
+                }
+
+                .form-control,
+                .dataTable-input {
+                    display: block;
+                    width: 100%;
+                    padding: 0.875rem 1.125rem;
+                    font-size: 0.875rem;
+                    font-weight: 400;
+                    line-height: 1;
+                    color: #69707a;
+                    background-color: #fff;
+                    background-clip: padding-box;
+                    border: 1px solid #c5ccd6;
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
+                    appearance: none;
+                    border-radius: 0.35rem;
+                    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+                }
+
+                .nav-borders .nav-link.active {
+                    color: #0061f2;
+                    border-bottom-color: #0061f2;
+                }
+
+                .nav-borders .nav-link {
+                    color: #69707a;
+                    border-bottom-width: 0.125rem;
+                    border-bottom-style: solid;
+                    border-bottom-color: transparent;
+                    padding-top: 0.5rem;
+                    padding-bottom: 0.5rem;
+                    padding-left: 0;
+                    padding-right: 0;
+                    margin-left: 1rem;
+                    margin-right: 1rem;
+                }
+
+                .btnSubmit,
+                .btnUpload {
+                    border: none;
+                    padding: 15px 45px;
+                    width: auto;
+                    font-size: 16px;
+                    text-transform: capitalize;
+                    line-height: normal;
+                    margin: 0 auto;
+                    display: flex;
+                    background: #f7444e;
+                    color: #fff;
+                    font-weight: 600;
+                    transition: ease all 0.1s;
+                }
+
+                .btnSubmit:hover,
+                .btnUpload:hover {
+                    background: #333;
+                }
+            </style>
+</head>
+
+<body>
+    <div class="hero_area">
+        <%- include('header') %>
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-4">
+
+                        <div class="card mb-4 mb-xl-0">
+                            <div class="card-header">Profile Picture</div>
+                            <div class="card-body text-center">
+                                <form action="/profile/edit" method="POST">
+                                    <div>
+                                        <img class="img-account-profile rounded-circle mb-2" id="image_img"
+                                            src="<%= user.image%>" alt="">
+                                    </div>
+                                    <input type="file" id="upload_file" hidden>
+                                    <input type="url" name="image" id="image_url" class="form-control"
+                                        style="margin: 20px 0;" value="<%= user.image%>">
+                                    <button type="button" class="btnUpload" type="button"
+                                        onclick="$('#upload_file').click()">Upload new
+                                        image</button>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-8">
+
+                        <div class="card mb-4">
+                            <div class="card-header">Account Details</div>
+                            <div class="card-body">
+
+                                <div class="mb-3">
+                                    <label class="small mb-1" for="inputUsername">Full Name</label>
+                                    <input class="form-control" id="name" type="text" name="name"
+                                        value="<%= user.name%>">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="small mb-1" for="inputUsername">Email</label>
+                                    <input class="form-control" id="email" type="email" name="email"
+                                        value="<%= user.email%>">
+                                </div>
+
+                                <div class="row gx-3 mb-3">
+
+                                    <div class="col-md-6">
+                                        <label class="small mb-1" for="inputFirstName">Phone</label>
+                                        <input class="form-control" id="phone" name="phone" type="text"
+                                            value="<%=user.phone%>">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="small mb-1" for="inputLastName">Address</label>
+                                        <input class="form-control" id="address" type="text" name="address"
+                                            value="<%= user.address%>">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="small mb-1" for="inputEmailAddress">Password</label>
+                                    <input class="form-control" id="password" type="password"
+                                        value="<%= user.password%>">
+                                </div>
+
+                                <button class="btnSubmit" type="submit">Save changes</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+
+    <!-- end client section -->
+    <!-- comment section -->
+
+    <!-- end comment section -->
+    <!-- footer start -->
+    <%- include('footer') %>
+        <!-- footer end -->
+</body>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const message = urlParams.get('message');
+
+        if (message === 'update_success') {
+            Swal.fire({
+                title: 'Success!',
+                text: 'Your profile has been updated successfully.',
+                icon: 'success'
+            });
+        } else if (message === 'update_failed') {
+            Swal.fire({
+                title: 'Error!',
+                text: 'There was a problem updating your profile.',
+                icon: 'error'
+            });
+        }
+    });
+
+    $(function () {
+        $('[name=image]').change(function () {
+            $('#image_img').attr('src', $(this).val())
+        })
+
+        // Event handler khi file được chọn
+        $('#upload_file').change(function (e) {
+            uploadFile(e, 'image_url'); // 'image_url' là ID của input nơi URL sẽ được đặt sau khi tải lên thành công
+        });
+    });
+
+    function uploadFile(e, target_id) {
+        var file = e.target.files[0];
+        if (!file.name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i)) {
+            alert('The image you uploaded is not in the correct file format)');
+            return;
+        }
+
+        var url = '//' + window.location.host + '/api/upload';
+        var xhr = new XMLHttpRequest();
+        var fd = new FormData();
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                var obj = JSON.parse(xhr.responseText);
+                if (obj.status === 'error') {
+                    alert(obj.message); // Hiển thị thông báo lỗi từ phía server
+                    return;
+                }
+
+                // Cập nhật giá trị của input chứa URL
+                document.getElementById(target_id).value = obj.url;
+                // Cập nhật hình ảnh hiển thị
+                $('#image_img').attr('src', obj.url);
+            } else if (xhr.readyState == 4 && xhr.status !== 200) {
+                alert('An error occurred during upload.');
+            }
+        };
+
+        fd.append('file', file); // 'file' là tên trường được dùng trong API backend
+        xhr.send(fd);
+    }
+    function addToCart() {
+        Swal.fire({
+            icon: 'success',
+            title: 'Product addded successfully!'
+        });
+        var formData = new FormData(document.getElementById("quantity-form"));
+        var xhr = new XMLHttpRequest();
+
+        xhr.open("POST", "{{url('add_cart', $product->id)}}", true);
+        xhr.send(formData);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                // Xử lý phản hồi từ máy chủ tại đây (nếu cần)
+                window.location.reload();
+            }
+        };
+
+    }
+
+    //    function addMoreCart(delta) {
+    //       num = parseInt($('[name=quantity]').val())
+    //       num += delta;
+    //       if (num < 1) num = 1
+    //       $('[name=quantity]').val(num);
+    //    }
+
+    //    function fixCartNum() {
+    //       $('[name=quantity]').val(Math.abs($('[name=quantity]').val()));
+    //    }
+</script>
+
+</html>

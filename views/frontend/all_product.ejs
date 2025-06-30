@@ -1,0 +1,91 @@
+<% path ="/products" %>
+<!DOCTYPE html>
+<html>
+<head>
+   <base href="/public">
+   <%- include('css') %>
+   <script src="dist/sweetalert.min.js"></script>
+<link rel="stylesheet" type="text/css" href="dist/sweetalert.css">
+<style>
+    .div_center{
+       text-align: center;
+       padding: 0 0 10px;
+    }
+    .layout_padding {
+        padding: 30px 0;
+    }
+    .inputSearch{
+       width: 50%;
+    }
+    @media (max-width: 1000px){
+       .product_section .box .detail-box h5{
+          font-size: 13px;
+       }
+       .product_section .box .detail-box h6 {
+          font-size: 13px;
+       }
+    }
+    @media (max-width: 767px){
+       .inputSearch{
+          width: 70%;
+       }
+    }
+    @media (max-width: 335px){
+       .inputSearch{
+          width: 100%;
+       }
+    }
+ </style>
+</head>
+
+<body>
+   <div class="hero_area">
+    <%- include('header') %>
+    <section class="product_section layout_padding">
+        <div class="container">
+         <%- include('view_product') %>
+        </div>
+     </section>
+   </div>
+
+   <!-- end client section -->
+   <!-- footer start -->
+   <%- include('footer') %>
+   <!-- footer end -->
+</body>
+
+<script>
+   //  document.addEventListener("DOMContentLoaded", function (event) {
+   //     var scrollpos = localStorage.getItem('scrollpos');
+   //     if (scrollpos) window.scrollTo(0, scrollpos);
+   //  });
+ 
+    window.onbeforeunload = function (e) {
+       localStorage.setItem('scrollpos', window.scrollY);
+    };
+
+    function addToCart() {
+            // event.preventDefault();
+            Swal.fire({
+               title: 'Product addded successfully!',
+               icon: 'success',
+               confirmButtonText: 'OK'
+            }).then((result) => {
+               if (result.isConfirmed) {
+                  window.location.reload();
+               }
+            });
+    }
+
+   function checkQuantity() {
+      event.preventDefault();
+      Swal.fire({
+         title: 'Sorry You😭😭😭!!!',
+         text: 'This product is out of stock!!!',
+         icon: 'warning',
+         confirmButtonText: 'OK',
+      })
+   }
+</script>
+
+</html>
