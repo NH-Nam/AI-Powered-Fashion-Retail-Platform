@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <%- include('css') %>
+    <% path='order'%>
+</head>
+
+<body>
+    <div class="container-scroller">
+    <!-- partial:partials/_sidebar.html -->
+    <%- include('siderbar') %>
+    <!-- partial -->
+    <%- include('header') %>
+    <!-- body -->
+    <!-- partial -->
+    <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="div_center">
+            <h1>Manage Order</h1>
+            <% if (message) { %>
+                <div class="alert alert-<%= message.type %>">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+                    <%= message.content %>
+                </div>
+            <% } %>
+          </div>
+          <div class="col-md-12 table-responsive">
+            <table class="table mb-0 align-middle text-nowrap table-bordered border">
+                <thead>
+                    <tr>
+                        <th class="border-top-0">No</th>
+                        <th class="border-top-0">Full Name</th>
+                        <th class="border-top-0">Email</th>
+                        <th class="border-top-0">Address</th>
+                        <th class="border-top-0">Phone</th>
+                        <th class="border-top-0">Payment status</th>
+                        <th class="border-top-0">Delivery status</th>
+                        <th class="border-top-0" style="width: 100px">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%var index =1; for(let order of orders){%>
+                        <tr>
+                            <td><%= index++%></td>
+                            <td><%= order.name%></td>
+                            <td><%= order.email%></td>
+                            <td><%= order.address%></td>
+                            <td><%= order.phone%></td>
+                            <td><%= order.payment_status%></td>
+                        <% if(order.delivery_status == 'processing'){ %>
+                            <td><%= order.delivery_status%></td>
+                            <td>
+                                <a href="/order/delivered/<%= order._id%>" onclick="return confirm('Are you sure this order is delivered')"><button class="btn btn-primary">Delivery</button></a>
+                                <a href="/order/detail/<%= order._id%>"><button class="btn btn-info">Details</button></a>
+                                <a href="/order/print_pdf/<%= order._id%>" class="btn btn-secondary"><i class="bi bi-download"></i></a>
+                            </td>
+                        <% }else{%>
+                            <td style="color: green;"><%= order.delivery_status%></td>
+                            <td>
+                                <a href="/order/detail/<%= order._id%>"><button class="btn btn-info">Details</button></a>
+                                <a href="/order/delete/<%= order._id%>" class="btn btn-danger" onclick="return  confirm('Are you sure to delete this order')">Delete</a>
+                                <a href="/order/print_pdf/<%= order._id%>" class="btn btn-secondary"><i class="bi bi-download"></i></a>
+                            </td>
+                        <%}%>
+                        </tr>
+                    <%}%>
+                    <%if(totalOrder >0) {%>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><p class="text-success"><strong>Total: <%= numberFormat(totalOrder)%> VNDC</strong></label></p>
+                        </tr>
+                    <%}%>
+                </tbody>
+            </table>
+            </div>
+        </div>
+      </div>
+    <!-- End body -->
+    <%- include('script') %>
+    <!-- End custom js for this page -->
+    </div>
+</body>
+
+</html>

@@ -44,6 +44,16 @@ router.post('/register', async (req, res) => {
                     };
                     return res.redirect('/register');
                 }
+
+                // Thêm kiểm tra số điện thoại
+                if (!/^[0-9]{10,15}$/.test(req.body.phone)) {
+                    req.session.message = {
+                        type: 'info',
+                        content: 'Phone number must be 10-15 digits!'
+                    };
+                    return res.redirect('/register');
+                }
+
                 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{9,}$/;
                 if (!passwordRegex.test(req.body.password)) {
                     req.session.message = {
@@ -56,13 +66,19 @@ router.post('/register', async (req, res) => {
                 const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
                 let newUser = req.body;
                 newUser.password = hashedPassword;
-                newUser.email_verified = false;
-                const verificationToken = generateVerificationToken();
-                newUser.emailToken = verificationToken;
+                newUser.email_verified = true; // Bypass verification for now
+                // newUser.email_verified = false; // (Restore this line to re-enable verification)
+                // const verificationToken = generateVerificationToken();
+                // newUser.emailToken = verificationToken;
                 await User.create(newUser);
 
-                await sendVerificationEmail(newUser.email, verificationToken);
-                res.redirect('/verify-email');
+                // await sendVerificationEmail(newUser.email, verificationToken); // (Restore to re-enable)
+                // res.redirect('/verify-email');
+                req.session.message = {
+                    type: 'success',
+                    content: 'Registration successful! You can log in now.'
+                };
+                res.redirect('/login');
             } else {
                 req.session.message = {
                     type: 'warning',
@@ -128,24 +144,32 @@ router.post('/login', async (req, res) => {
         // So sánh mật khẩu đã nhập với mật khẩu đã mã hóa
         const match = await bcrypt.compare(req.body.password, user.password);
         if (match) {
-            if (user.email_verified === true) {
-                // Nếu email đã được xác minh
-                const token = jwt.sign(
-                    { userId: user._id, usertype: user.usertype },
-                    process.env.JWT_SECRET,
-                    { expiresIn: '24h' }
-                );
-                res.cookie('token', token, { httpOnly: true, sameSite: true });
-                res.redirect('/redirect');
-            } else {
-                // Nếu email chưa được xác minh
-                const verificationToken = generateVerificationToken();
-                user.emailToken = verificationToken;
-                await user.save();
-
-                await sendVerificationEmail(user.email, verificationToken);
-                res.redirect('/verify-email');
-            }
+            // Bypass email verification for now
+            // if (user.email_verified === true) {
+            //     // Nếu email đã được xác minh
+            //     const token = jwt.sign(
+            //         { userId: user._id, usertype: user.usertype },
+            //         process.env.JWT_SECRET,
+            //         { expiresIn: '24h' }
+            //     );
+            //     res.cookie('token', token, { httpOnly: true, sameSite: true });
+            //     res.redirect('/redirect');
+            // } else {
+            //     // Nếu email chưa được xác minh
+            //     const verificationToken = generateVerificationToken();
+            //     user.emailToken = verificationToken;
+            //     await user.save();
+            //     await sendVerificationEmail(user.email, verificationToken);
+            //     res.redirect('/verify-email');
+            // }
+            // Allow login regardless of email_verified
+            const token = jwt.sign(
+                { userId: user._id, usertype: user.usertype },
+                process.env.JWT_SECRET,
+                { expiresIn: '24h' }
+            );
+            res.cookie('token', token, { httpOnly: true, sameSite: true });
+            res.redirect('/redirect');
         } else {
             req.session.message = {
                 type: 'danger',

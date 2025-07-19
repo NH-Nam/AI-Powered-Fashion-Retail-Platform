@@ -1,0 +1,386 @@
+<div id="chatbot-toggle">
+   <img src="https://img.icons8.com/fluency/48/chatbot.png" alt="Open Chatbot" />
+</div>
+
+<div id="chatbot-popup" style="display: none;">
+   <div class="chatbot-header">
+      <img src="https://img.icons8.com/fluency/32/chatbot.png" />
+      <span>AI ChatBot</span>
+      <button id="clear-chat" style="background:transparent; border:none; color:white; font-size:20px; cursor:pointer; margin-right:8px;" title="Clear Chat">🗑️</button>
+      <button id="chatbot-close">×</button>
+   </div>
+   <div class="chatbot-body" id="chat-log">
+      <div class="msg bot">
+         <div class="bubble">Xin chào! Tôi có thể hỗ trợ gì cho bạn?</div>
+      </div>
+   </div>
+   <form id="chat-form" class="chatbot-footer">
+      <div class="input-wrapper">
+         <input type="text" id="chat-input" placeholder="Ask Something..." autocomplete="off" />
+         <button type="submit" id="send-button">
+            <img src="https://img.icons8.com/ios-filled/24/000000/sent.png" alt="Send" />
+         </button>
+      </div>
+   </form>
+</div>
+
+<style>
+   #chatbot-toggle {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      cursor: pointer;
+      z-index: 10000;
+   }
+
+   #chatbot-toggle img {
+      width: 52px;
+      height: 52px;
+   }
+
+   #chatbot-popup {
+      position: fixed;
+      bottom: 90px;
+      right: 25px;
+      width: 400px;
+      height: 520px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+   }
+
+   .chatbot-header {
+      background: #45b1b7;
+      color: white;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+   }
+
+   .chatbot-header img {
+      margin-right: 8px;
+   }
+
+   .chatbot-header span {
+      flex: 1;
+      font-weight: bold;
+      font-size: 16px;
+   }
+
+   .chatbot-header button {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 22px;
+      cursor: pointer;
+   }
+
+   .chatbot-body {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      background: #f8f8f8;
+   }
+
+   .msg {
+      display: flex;
+      margin-bottom: 12px;
+   }
+
+   .msg.user {
+      justify-content: flex-end;
+   }
+
+   .msg.bot {
+      justify-content: flex-start;
+   }
+
+   .bubble {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+   }
+
+   .msg.user .bubble {
+      background: #e0e0e0;
+      border-radius: 16px 0 16px 16px;
+   }
+
+   .msg.bot .bubble {
+      background: #d1e7dd;
+      border-radius: 0 16px 16px 16px;
+   }
+
+   .chatbot-footer {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+      background: #fff;
+   }
+
+   .input-wrapper {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+   }
+
+   #chat-input {
+      flex: 1;
+      padding: 10px 40px 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      outline: none;
+      text-transform: none;
+   }
+
+   #send-button {
+      position: absolute;
+      right: 5px;
+      /* Adjust position as needed */
+      background-color: transparent;
+      border: none;
+      padding: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+   }
+
+   #send-button img {
+      width: 24px;
+      /* Adjust icon size */
+      height: 24px;
+      /* Adjust icon size */
+      margin-bottom: 20px;
+   }
+</style>
+<footer>
+   <div class="container">
+      <div class="row">
+         <div class="col-md-4">
+            <div class="full">
+               <div class="logo_footer">
+                  <a href="/"><img width="210" src="../../themes/frontend/images/logo_clothing.gif" alt="#" /></a>
+               </div>
+               <div class="information_f">
+                  <p><strong>ADDRESS:</strong> Goldern Park, Pham Van Bach, VietNam</p>
+                  <p><strong>TELEPHONE:</strong> +91 987 654 3210</p>
+                  <p><strong>EMAIL:</strong> dlongminh@gmail.com</p>
+               </div>
+            </div>
+         </div>
+         <div class="col-md-8">
+            <div class="row">
+               <div class="col-md-7">
+                  <div class="row">
+                     <div class="col-md-6">
+                        <div class="widget_menu">
+                           <h3>Menu</h3>
+                           <ul>
+                              <li><a href="/home">Home</a></li>
+                              <li><a href="/products">About</a></li>
+                              <li><a href="/">Services</a></li>
+                              <li><a href="/">Testimonial</a></li>
+                              <li><a href="/">Blog</a></li>
+                              <li><a href="/contact">Contact</a></li>
+                           </ul>
+                        </div>
+                     </div>
+                     <div class="col-md-6">
+                        <div class="widget_menu">
+                           <h3>Account</h3>
+                           <ul>
+                              <li><a href="/profile">Account</a></li>
+                              <li><a href="/card">Checkout</a></li>
+                              <li><a href="/login">Login</a></li>
+                              <li><a href="/register">Register</a></li>
+                              <li><a href="/products">Shopping</a></li>
+                              <li><a href="/">Widget</a></li>
+                           </ul>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div class="col-md-5">
+                  <div class="widget_menu">
+                     <h3>Newsletter</h3>
+                     <div class="information_f">
+                        <p>Subscribe by our newsletter and get update protidin.</p>
+                     </div>
+                     <div class="form_sub">
+                        <form>
+                           <fieldset>
+                              <div class="field">
+                                 <input type="email" placeholder="Enter Your Mail" name="email" />
+                                 <input type="submit" value="Subscribe" />
+                              </div>
+                           </fieldset>
+                        </form>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</footer>
+<div class="cpy_">
+   <p class="mx-auto">© 2023 All Rights Reserved By <a href="https://dlong3907portfolio.onrender.com/"
+         target="_blank">longtech</a><br>
+
+      Distributed By <a href="https://dlong3907portfolio.onrender.com/" target="_blank">Duc Long</a>
+
+   </p>
+</div>
+<script>
+   //thong bao dang nhap
+   function checkToken() {
+      event.preventDefault();
+      Swal.fire({
+         title: 'Requires login',
+         text: 'You must log in to perform this function. Log in now?',
+         icon: 'warning',
+         showCancelButton: true,
+         confirmButtonText: 'Login',
+         cancelButtonText: 'Cancel',
+      }).then((result) => {
+         if (result.isConfirmed) {
+            window.location.href = '/login';
+         }
+      });
+   }
+</script>
+<!-- jQery -->
+<script src="../../themes/frontend/js/jquery-3.4.1.min.js"></script>
+<!-- popper js -->
+<script src="../../themes/frontend/js/popper.min.js"></script>
+<!-- bootstrap js -->
+<script src="../../themes/frontend/js/bootstrap.js"></script>
+<!-- custom js -->
+<script src="../../themes/frontend/js/custom.js"></script>
+<!-- marked.js -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+   const chatToggle = document.getElementById("chatbot-toggle");
+   const chatPopup = document.getElementById("chatbot-popup");
+   const closeBtn = document.getElementById("chatbot-close");
+   const chatForm = document.getElementById("chat-form");
+   const chatInput = document.getElementById("chat-input");
+   const chatLog = document.getElementById("chat-log");
+   const clearChatBtn = document.getElementById("clear-chat");
+
+   chatToggle.addEventListener("click", () => {
+      chatPopup.style.display = "flex";
+      chatToggle.style.display = "none";
+      chatInput.focus();
+   });
+
+   closeBtn.addEventListener("click", () => {
+      chatPopup.style.display = "none";
+      chatToggle.style.display = "block";
+   });
+
+   chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const question = chatInput.value.trim();
+      if (!question) return;
+
+      appendMessage(question, "user");
+      chatInput.value = "";
+      chatInput.focus();
+
+      try {
+         const res = await fetch("/chatbot/ask-ai", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question })
+         });
+
+         const data = await res.json();
+
+         // Always show the AI's reply first, then show products if any
+         if (data.reply && data.reply.trim() !== "" && (!data.products || !Array.isArray(data.products) || data.products.length === 0 || data.reply.trim() !== (data.products[0]?.title || ""))) {
+            appendMessage(data.reply, "bot");
+         }
+         if (data.products && Array.isArray(data.products) && data.products.length > 0) {
+            data.products.forEach(product => {
+               appendProduct(product);
+            });
+         }
+      } catch (err) {
+         appendMessage("Error communicating with server.", "bot");
+      }
+   });
+
+   // Chat history persistence using localStorage
+   function saveChatHistory() {
+      localStorage.setItem('chatbot_history', chatLog.innerHTML);
+   }
+   function restoreChatHistory() {
+      const history = localStorage.getItem('chatbot_history');
+      if (history) {
+         chatLog.innerHTML = history;
+         chatLog.scrollTop = chatLog.scrollHeight;
+      }
+   }
+   // Restore chat history on page load
+   restoreChatHistory();
+
+   function appendMessage(text, sender) {
+      const msg = document.createElement("div");
+      msg.className = `msg ${sender}`;
+      // Use marked to convert markdown to HTML
+      msg.innerHTML = `<div class="bubble">${marked.parse(text)}</div>`;
+      chatLog.appendChild(msg);
+      chatLog.scrollTop = chatLog.scrollHeight;
+      saveChatHistory();
+   }
+
+   function appendProduct(product) {
+      const msg = document.createElement("div");
+      msg.className = "msg bot";
+      msg.innerHTML = `
+         <div class="bubble" style="padding: 10px;">
+            <strong>${product.title}</strong><br>
+            <img src="${product.image}" alt="${product.title}" style="max-width:100%;max-height:120px;display:block;margin:8px 0;">
+            <span>Giá: ${product.price.toLocaleString('vi-VN')} VND</span><br>
+            <span>${product.description || ""}</span>
+         </div>
+      `;
+      chatLog.appendChild(msg);
+      chatLog.scrollTop = chatLog.scrollHeight;
+      saveChatHistory();
+   }
+
+   function showTypingIndicator() {
+      const typing = document.createElement("div");
+      typing.className = "msg bot typing-indicator";
+      typing.innerHTML = `<div class="bubble"><em>Bot is typing...</em></div>`;
+      typing.id = "typing-indicator";
+      chatLog.appendChild(typing);
+      chatLog.scrollTop = chatLog.scrollHeight;
+   }
+
+   function removeTypingIndicator() {
+      const typing = document.getElementById("typing-indicator");
+      if (typing) typing.remove();
+   }
+
+   clearChatBtn.addEventListener("click", () => {
+      chatLog.innerHTML = "";
+      localStorage.removeItem("chatbot_history");
+   });
+</script>
