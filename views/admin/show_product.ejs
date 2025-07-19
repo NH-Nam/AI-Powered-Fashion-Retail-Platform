@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <%- include('css') %>
+    <% path='product'%>
+</head>
+
+<body>
+    <div class="container-scroller">
+        <!-- partial:partials/_sidebar.html -->
+        <%- include('siderbar') %>
+        <!-- header-->
+        <%- include('header') %>
+        <!-- End hear-->
+        <!-- body -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <% if (message) { %>
+                    <div class="alert alert-<%= message.type %>">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+                        <%= message.content %>
+                    </div>
+                <% } %>
+                <div class="div_center">
+                  <h1>Manage Product</h1>
+      
+                </div>
+      
+                <table class="table mb-0 align-middle text-nowrap table-responsive">
+                      <thead class="border">
+                          <tr>
+                              <th class="border-top-0">No</th>
+                              <th class="border-top-0">Title</th>
+                              <th class="border-top-0">Image</th>
+                              <th class="border-top-0">Category Name</th>
+                              <th class="border-top-0">Price</th>
+                              <th class="border-top-0">Discount</th>
+                              <th class="border-top-0">Quantity</th>
+                              <th class="border-top-0">Updated At</th>
+                              <th class="border-top-0" style="width: 100px">Action</th>
+                          </tr>
+                      </thead>
+                      <tbody class="border">
+                        <%  var index=1; for(let product of products) {%>
+                              <tr>
+                                  <td><%= index++%></td>
+                                  <td><%= product.title%></td>
+                                  <td><img src="<%= product.image%>" style="height:150px; width:150px; border-radius:0;"></td>
+                                  <td><%= product.category.name%></td>
+                                  <td><%= numberFormat(product.price)%> VNDC</td>
+                                  <td><%= numberFormat(product.discount_price)%> VNDC</td>
+                                  <td><%= product.quantity%></td>
+                                  <td><%= formatDate(product.updated_at)%></td>
+                                  <td>
+                                      <a href="/product/edit/<%= product._id%>" button class="btn btn-warning" style="margin-right:10px;">Edit</a>
+                                      <a onclick="return confirm('Are You Sure to delete this?')" href="/product/delete/<%= product._id%>"
+                                      class="btn btn-danger">Delete</a>
+                                  </td>
+                              </tr>
+                        <% } %>
+                      </tbody>
+                  </table>
+      
+            </div>
+          </div>
+        </div>
+        <!-- End body -->
+        <!-- plugins:js -->
+        <%- include('script') %>
+        <!-- End custom js for this page -->
+    </div>
+</body>
+
+</html>
