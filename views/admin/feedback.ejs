@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <%- include('css') %>
+    <% path='feedback'%>
+</head>
+
+<body>
+    <div class="container-scroller">
+    <!-- partial:partials/_sidebar.html -->
+    <%- include('siderbar') %>
+    <!-- partial -->
+    <%- include('header') %>
+    <!-- body -->
+    <!-- partial -->
+    <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="div_center">
+            <h1>Manage Feedbacks</h1>
+            <% if (message) { %>
+                <div class="alert alert-<%= message.type %>">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+                    <%= message.content %>
+                </div>
+            <% } %>
+          </div>
+  
+          <table class="table mb-0 table-bordered align-middle text-nowrap table-responsive">
+            <thead>
+              <tr>
+                <th class="border-top-0">No</th>
+                <th class="border-top-0">Full Name</th>
+                <th class="border-top-0">Email</th>
+                <th class="border-top-0">Phone Number</th>
+                <th class="border-top-0">Subject Name</th>
+                <th class="border-top-0">Note</th>
+                <th class="border-top-0">Updated At</th>
+                <th class="border-top-0">Status</th>
+                <th class="border-top-0" style="width: 100px">Action</th>
+              </tr>
+            </thead>
+            <tbody >
+                <%var index =1; for(let item of feedbacks){%>
+              <tr>
+                <td><%= index++%></td>
+                <td><%=item.fullname%></td>
+                <td><%=item.email%></td>
+                <td><%=item.phone%></td>
+                <td><%=item.subject_name%></td>
+                <td><%=item.note%></td>
+                <td><%=formatDate(item.updated_at)%></td>
+                <td>
+                  <%if(item.status == 0){%>
+                  <label class="label" style="color:#d99100;">Not read</label>
+                  <%} else{%>
+                  <label class="label" style="color:#00d25b;">Read</label>
+                  <%}%>
+                </td>
+                <td>
+                  <%if(item.status == 0){%>
+                  <a href="feedback/markRead/<%=item._id%>" class="btn btn-warning"
+                    onclick="return confirm('Are you sure this feedback is mark read')">Mark Read</a>
+                    <a onclick="return confirm('Are You Sure to delete this feedback?')"
+                    href="feedback/delete/<%=item._id%>" class="btn btn-danger">Delete</a>
+                  <%} else{%>
+                  <button class="btn btn-success">Read</button>
+                  <a href="feedback/send_email/<%=item._id%>" class="btn btn-info">Feedback</a>
+                  <a onclick="return confirm('Are You Sure to delete this feedback?')"
+                    href="feedback/delete/<%=item._id%>" class="btn btn-danger">Delete</a>
+                  <%}%>
+                </td>
+              </tr>
+              <%}%>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <!-- End body -->
+    <%- include('script') %>
+    <!-- End custom js for this page -->
+    </div>
+</body>
+
+</html>
