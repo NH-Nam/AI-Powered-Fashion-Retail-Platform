@@ -6,6 +6,7 @@
    <div class="chatbot-header">
       <img src="https://img.icons8.com/fluency/32/chatbot.png" />
       <span>AI ChatBot</span>
+      <button id="clear-chat" style="background:transparent; border:none; color:white; font-size:20px; cursor:pointer; margin-right:8px;" title="Clear Chat">🗑️</button>
       <button id="chatbot-close">×</button>
    </div>
    <div class="chatbot-body" id="chat-log">
@@ -137,12 +138,11 @@
    #chat-input {
       flex: 1;
       padding: 10px 40px 10px 12px;
-      /* Adjusted padding for the icon */
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 14px;
       outline: none;
-      /* Remove outline on focus */
+      text-transform: none;
    }
 
    #send-button {
@@ -193,7 +193,6 @@
                               <li><a href="/products">About</a></li>
                               <li><a href="/">Services</a></li>
                               <li><a href="/">Testimonial</a></li>
-                              <li><a href="/">Blog</a></li>
                               <li><a href="/">Blog</a></li>
                               <li><a href="/contact">Contact</a></li>
                            </ul>
@@ -271,6 +270,8 @@
 <script src="../../themes/frontend/js/bootstrap.js"></script>
 <!-- custom js -->
 <script src="../../themes/frontend/js/custom.js"></script>
+<!-- marked.js -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script>
    const chatToggle = document.getElementById("chatbot-toggle");
@@ -279,11 +280,12 @@
    const chatForm = document.getElementById("chat-form");
    const chatInput = document.getElementById("chat-input");
    const chatLog = document.getElementById("chat-log");
+   const clearChatBtn = document.getElementById("clear-chat");
 
    chatToggle.addEventListener("click", () => {
       chatPopup.style.display = "flex";
       chatToggle.style.display = "none";
-      chatInput.focus(); // Focus on the input field when chatbot opens
+      chatInput.focus();
    });
 
    closeBtn.addEventListener("click", () => {
@@ -293,32 +295,92 @@
 
    chatForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const prompt = chatInput.value.trim();
-      if (!prompt) return;
+      const question = chatInput.value.trim();
+      if (!question) return;
 
-      appendMessage(prompt, "user");
+      appendMessage(question, "user");
       chatInput.value = "";
-      chatInput.focus(); // Keep focus on the input field after sending
+      chatInput.focus();
 
       try {
-         const res = await fetch("/chatbot", {
+         const res = await fetch("/chatbot/ask-ai", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ prompt })
+            body: JSON.stringify({ question })
          });
 
          const data = await res.json();
-         appendMessage(data.reply || "No response", "bot");
+
+         // Always show the AI's reply first, then show products if any
+         if (data.reply && data.reply.trim() !== "" && (!data.products || !Array.isArray(data.products) || data.products.length === 0 || data.reply.trim() !== (data.products[0]?.title || ""))) {
+            appendMessage(data.reply, "bot");
+         }
+         if (data.products && Array.isArray(data.products) && data.products.length > 0) {
+            data.products.forEach(product => {
+               appendProduct(product);
+            });
+         }
       } catch (err) {
          appendMessage("Error communicating with server.", "bot");
       }
    });
 
+   // Chat history persistence using localStorage
+   function saveChatHistory() {
+      localStorage.setItem('chatbot_history', chatLog.innerHTML);
+   }
+   function restoreChatHistory() {
+      const history = localStorage.getItem('chatbot_history');
+      if (history) {
+         chatLog.innerHTML = history;
+         chatLog.scrollTop = chatLog.scrollHeight;
+      }
+   }
+   // Restore chat history on page load
+   restoreChatHistory();
+
    function appendMessage(text, sender) {
       const msg = document.createElement("div");
       msg.className = `msg ${sender}`;
-      msg.innerHTML = `<div class="bubble">${text}</div>`;
+      // Use marked to convert markdown to HTML
+      msg.innerHTML = `<div class="bubble">${marked.parse(text)}</div>`;
       chatLog.appendChild(msg);
       chatLog.scrollTop = chatLog.scrollHeight;
+      saveChatHistory();
    }
+
+   function appendProduct(product) {
+      const msg = document.createElement("div");
+      msg.className = "msg bot";
+      msg.innerHTML = `
+         <div class="bubble" style="padding: 10px;">
+            <strong>${product.title}</strong><br>
+            <img src="${product.image}" alt="${product.title}" style="max-width:100%;max-height:120px;display:block;margin:8px 0;">
+            <span>Giá: ${product.price.toLocaleString('vi-VN')} VND</span><br>
+            <span>${product.description || ""}</span>
+         </div>
+      `;
+      chatLog.appendChild(msg);
+      chatLog.scrollTop = chatLog.scrollHeight;
+      saveChatHistory();
+   }
+
+   function showTypingIndicator() {
+      const typing = document.createElement("div");
+      typing.className = "msg bot typing-indicator";
+      typing.innerHTML = `<div class="bubble"><em>Bot is typing...</em></div>`;
+      typing.id = "typing-indicator";
+      chatLog.appendChild(typing);
+      chatLog.scrollTop = chatLog.scrollHeight;
+   }
+
+   function removeTypingIndicator() {
+      const typing = document.getElementById("typing-indicator");
+      if (typing) typing.remove();
+   }
+
+   clearChatBtn.addEventListener("click", () => {
+      chatLog.innerHTML = "";
+      localStorage.removeItem("chatbot_history");
+   });
 </script>
