@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <%- include('css') %>
+    <% path='redirect'%>
+</head>
+
+<body>
+    <div class="container-scroller">
+        <!-- partial:partials/_sidebar.html -->
+        <%- include('siderbar') %>
+        <!-- partial -->
+        <%- include('header') %>
+        <!-- partial body -->
+        <%- include('body') %>
+        <!-- container-scroller -->
+        <!-- plugins:js -->
+        <%- include('script') %>
+        <!-- End custom js for this page -->
+    </div>
+</body>
+
+</html>

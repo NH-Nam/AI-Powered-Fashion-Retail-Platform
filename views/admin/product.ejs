@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <%- include('css') %>
+    <% path='product'%>
+</head>
+
+<body>
+    <div class="container-scroller">
+    <!-- partial:partials/_sidebar.html -->
+    <%- include('siderbar') %>
+    <!-- partial -->
+    <%- include('header') %>
+    <!-- body -->
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="div_center">
+                <h1>Add Product</h1>
+            </div>
+            <% if (message) { %>
+                <div class="alert alert-<%= message.type %>">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+                    <%= message.content %>
+                </div>
+            <% } %>
+            <form action="<%= product._id ? '/product/edit/'+ product._id : '/product/add' %>" method="post" id="MyForm">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label>Title: </label>
+                            <input type="text" name="title" class="form-control" required value="<%= product.title%>">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <textarea name="description" id="description" class="form-control" rows="10"><%= product.description%></textarea>
+                        </div>
+                        <div class="form-group" style="margin-top: 30px">
+                            <button class="btn btn-success">Save</button>
+                            <a href="/product">Back to list</a>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Image: </label>
+                            <button type="button" class="btn btn-warning"
+                                onclick="$('#upload_file').click()" style="margin-top: -10px;">Upload photos</button>
+                            <input type="file" id="upload_file" hidden>
+                            <input type="url" name="image" id="image_url" class="form-control" required
+                                value="<%= product.image %>">
+                            <img src="" style="max-height: 220px;" id="image_img">
+
+                        </div>
+                        <div class="form-group">
+                            <label>Price: </label>
+                            <input required type="number" name="price" class="form-control" value="<%= product.price%>">
+                        </div>
+                        <div class="form-group">
+                            <label>Discount: </label>
+                            <input type="number" name="discount_price" class="form-control"
+                                value="<%= product.discount_price%>">
+                        </div>
+                        <div class="form-group">
+                            <label>Category Name: </label>
+                            <select class="form-control" required name="category">
+                            <option>-- Select Category --</option>
+                            <% var id=product.category.id; for(let category of categories) {%>
+                                <% if(id !=null && id==category._id) { %>
+                                    <option selected value="<%= category._id %>"><%= category.name %></option>
+                                <% } else{ %>
+                                    <option value="<%= category._id %>"><%= category.name %></option>
+                                <% } %>
+                            <% }%>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantity: </label>
+                            <input required type="number" name="quantity" class="form-control" value="<%= product.quantity%>">
+                        </div>
+                        <div class="form-group">
+                            <label>Color: </label>
+                            <input type="text" name="color" class="form-control" value="<%= product.color || '' %>">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- End body -->
+    <%- include('script') %>
+    <!-- End custom js for this page -->
+    <script>
+        $(function () {
+            CKEDITOR.replace('description');
+
+            $('[name=image]').change(function () {
+                $('#image_img').attr('src', $(this).val())
+            })
+
+            // Event handler khi file được chọn
+            $('#upload_file').change(function (e) {
+                uploadFile(e, 'image_url'); // 'image_url' là ID của input nơi URL sẽ được đặt sau khi tải lên thành công
+            });
+        });
+
+        function uploadFile(e, target_id) {
+            var file = e.target.files[0];
+            if (!file.name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i)) {
+                alert('The image you uploaded is not in the correct file format)');
+                return;
+            }
+
+            var url = '//' + window.location.host + '/api/upload';
+            var xhr = new XMLHttpRequest();
+            var fd = new FormData();
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var obj = JSON.parse(xhr.responseText);
+                    if (obj.status === 'error') {
+                        alert(obj.message); // Hiển thị thông báo lỗi từ phía server
+                        return;
+                    }
+
+                    // Cập nhật giá trị của input chứa URL
+                    document.getElementById(target_id).value = obj.url;
+                     // Cập nhật hình ảnh hiển thị
+                    $('#image_img').attr('src', obj.url);
+                } else if (xhr.readyState == 4 && xhr.status !== 200) {
+                    alert('An error occurred during upload.');
+                }
+            };
+
+            fd.append('file', file); // 'file' là tên trường được dùng trong API backend
+            xhr.send(fd);
+        }
+    </script>
+    </div>
+</body>
+
+</html>
