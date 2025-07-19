@@ -34,7 +34,7 @@ app.set('view engine', 'ejs');
 
 // 2. config 'mongoose' module
 var mongoose = require('mongoose');
-var uri = process.env.MONGODB_URI || "mongodb+srv://long3907:mwTxAR6YzyyxYaIT@demodb.kndwxsk.mongodb.net/ShopToys";
+var uri = process.env.MONGODB_URI || "lmao no";
 mongoose.set('strictQuery', true); //ignore mongoose warning
 mongoose.connect(uri)
     .then(() => console.log('Connect success'))
