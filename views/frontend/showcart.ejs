@@ -4,6 +4,8 @@
 <head>
     <base href="/public">
     <%totalmoney=0 %>
+    <%totalsaving=0 %>
+    <%subtotalBefore=0 %>
         <%- include('css') %>
             <style>
                 .title {
@@ -207,6 +209,7 @@
                                                 <th scope="col">Title</th>
                                                 <th scope="col">Image</th>
                                                 <th scope="col">Price</th>
+                                                <th scope="col">Options</th>
                                                 <th scope="col">Quantity</th>
                                                 <th scope="col">Total Price</th>
                                                 <th scope="col">Action</th>
@@ -216,6 +219,7 @@
                                             <tbody>
                                                 <%var index=1; for(let cart of carts ) {%>
                                                     <tr>
+                                                        <% const isDiscount = Number(cart.price) < Number(cart.product_id.price); const itemSaving = isDiscount ? (Number(cart.product_id.price) - Number(cart.price)) * Number(cart.quantity) : 0; const originalTotal = Number(cart.product_id.price) * Number(cart.quantity); %>
                                                         <td>
                                                             <%= index++%>
                                                         </td>
@@ -227,7 +231,20 @@
                                                                 style="width: 3.5rem;">
                                                         </td>
                                                         <td>
-                                                            <%= numberFormat(cart.price)%>
+                                                            <% if (isDiscount) { %>
+                                                                 <span style="text-decoration: line-through; color:#888;"><%= numberFormat(cart.product_id.price) %> VND</span><br>
+                                                                 <span style="color:#e60023; font-weight:600;"><%= numberFormat(cart.price) %> VND</span>
+                                                                 <small style="display:block;color:#28a745;">You save <%= numberFormat(Number(cart.product_id.price) - Number(cart.price)) %> VND each</small>
+                                                            <% } else { %>
+                                                                 <%= numberFormat(cart.price)%> VND
+                                                            <% } %>
+                                                        </td>
+                                                        <td>
+                                                            <% if (cart.selected_color || cart.selected_size) { %>
+                                                                <span><% if (cart.selected_color) { %>Color: <%= cart.selected_color %><% } %><% if (cart.selected_color && cart.selected_size) { %> · <% } %><% if (cart.selected_size) { %>Size: <%= cart.selected_size %><% } %></span>
+                                                            <% } else { %>
+                                                                <span>-</span>
+                                                            <% } %>
                                                         </td>
                                                         <td>
                                                             <form id="quantity-form" style="display:inline-block;"
@@ -240,7 +257,10 @@
                                                             </form>
                                                         </td>
                                                         <td>
-                                                            <%= numberFormat(cart.total_price)%>
+                                                             <%= numberFormat(cart.total_price)%> VND
+                                                            <% if (isDiscount) { %>
+                                                                <br><small style="color:#28a745;">You saved <%= numberFormat(itemSaving) %></small>
+                                                            <% } %>
                                                         </td>
                                                         <td>
                                                             <a href="/cart/delete/<%= cart._id%>"
@@ -249,6 +269,8 @@
                                                         </td>
                                                     </tr>
                                                     <% totalmoney=totalmoney + cart.total_price %>
+                                                    <% totalsaving=totalsaving + itemSaving %>
+                                                    <% subtotalBefore=subtotalBefore + originalTotal %>
 
                                                         <%}%>
                                             </tbody>
@@ -288,7 +310,13 @@
                             <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">
                                 <div class="col" style="font-weight:800;">TOTAL PRICE</div>
                                 <div>
-                                    <%= numberFormat(totalmoney)%> VNDC
+                                    <% if (totalsaving > 0) { %>
+                                         <div style="color:#888; text-decoration: line-through;"><%= numberFormat(subtotalBefore) %> VND</div>
+                                    <% } %>
+                                     <div><%= numberFormat(totalmoney)%> VND</div>
+                                    <% if (totalsaving > 0) { %>
+                                         <div style="color:#28a745;">You saved <%= numberFormat(totalsaving) %> VND</div>
+                                    <% } %>
                                 </div>
                             </div>
                             <input type="submit" value="CHECKOUT" class="btnSubmit"></input>
