@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('css') %>
+  <% path='redirect' %>
+  <style>
+    .table td, .table th { vertical-align: middle; }
+    /* Dark theme input styling consistent with inventory page */
+    .card .form-control { color: #fff; background-color: #1f2532; }
+    .card .form-control::placeholder { color: #9aa4b2; }
+    .card .form-check-label { color: #fff; }
+  </style>
+  <title>Warehouses</title>
+  </head>
+<body>
+  <div class="container-scroller">
+    <%- include('siderbar') %>
+    <%- include('header') %>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <% if (message) { %>
+          <div class="alert alert-<%= message.type %>"><%= message.content %></div>
+        <% } %>
+        <div class="row">
+          <div class="col-md-6 grid-margin stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title">Add Warehouse</h4>
+                <form class="forms-sample" method="post" action="/warehouses/admin/add">
+                  <div class="form-group">
+                    <label>Name</label>
+                    <input name="name" type="text" class="form-control" placeholder="Main Warehouse" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Code</label>
+                    <input name="code" type="text" class="form-control" placeholder="MAIN" required>
+                  </div>
+                  <div class="form-group">
+                    <label>Address</label>
+                    <input name="address" type="text" class="form-control" placeholder="123 Street, City">
+                  </div>
+                  <div class="form-group">
+                    <label>Phone</label>
+                    <input name="phone" type="text" class="form-control" placeholder="+84...">
+                  </div>
+                  <div class="form-check form-check-flat form-check-primary">
+                    <label class="form-check-label">
+                      <input type="checkbox" class="form-check-input" name="is_default"> Set as default
+                    </label>
+                  </div>
+                  <button type="submit" class="btn btn-primary mr-2">Create</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 grid-margin stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <h4 class="card-title">Warehouses</h4>
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Code</th>
+                        <th>Stock</th>
+                        <th>Default</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% warehouses.forEach(function(w){ %>
+                        <tr>
+                          <td><%= w.name %></td>
+                          <td><%= w.code %></td>
+                          <td><%= w.totalQuantity %></td>
+                          <td><%= w.is_default ? 'Yes' : 'No' %></td>
+                          <td>
+                            <a class="btn btn-sm btn-info" href="/warehouses/admin/<%= w._id %>">Inventory</a>
+                            <a class="btn btn-sm btn-danger" href="/warehouses/admin/delete/<%= w._id %>">Delete</a>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <div class="d-sm-flex justify-content-center justify-content-sm-between">
+          <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">© 2023 All Rights Reserved By longtech</span>
+        </div>
+      </footer>
+    </div>
+    <%- include('script') %>
+  </div>
+</body>
+</html>
+
+

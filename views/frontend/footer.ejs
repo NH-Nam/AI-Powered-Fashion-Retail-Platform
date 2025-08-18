@@ -6,9 +6,10 @@
    <div class="chatbot-header">
       <img src="https://img.icons8.com/fluency/32/chatbot.png" />
       <span>AI ChatBot</span>
-      <button id="clear-chat" style="background:transparent; border:none; color:white; font-size:20px; cursor:pointer; margin-right:8px;" title="Clear Chat">🗑️</button>
+      <button id="clear-chat" title="Clear Chat">🗑️</button>
       <button id="chatbot-close">×</button>
    </div>
+   
    <div class="chatbot-body" id="chat-log">
       <div class="msg bot">
          <div class="bubble">Xin chào! Tôi có thể hỗ trợ gì cho bạn?</div>
@@ -17,155 +18,113 @@
    <form id="chat-form" class="chatbot-footer">
       <div class="input-wrapper">
          <input type="text" id="chat-input" placeholder="Ask Something..." autocomplete="off" />
-         <button type="submit" id="send-button">
-            <img src="https://img.icons8.com/ios-filled/24/000000/sent.png" alt="Send" />
+         <button type="submit" id="send-button" aria-label="Send">
+            <img src="https://img.icons8.com/ios-filled/24/000000/sent.png" alt="" />
          </button>
       </div>
    </form>
 </div>
 
 <style>
+   /* Chatbot Toggle & Popup */
    #chatbot-toggle {
-      position: fixed;
-      bottom: 25px;
-      right: 25px;
-      cursor: pointer;
-      z-index: 10000;
+      position: fixed; bottom: 25px; right: 25px; cursor: pointer; z-index: 10000;
    }
-
-   #chatbot-toggle img {
-      width: 52px;
-      height: 52px;
-   }
+   #chatbot-toggle img { width: 52px; height: 52px; }
 
    #chatbot-popup {
-      position: fixed;
-      bottom: 90px;
-      right: 25px;
-      width: 400px;
-      height: 520px;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-      z-index: 10000;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
+      position: fixed; bottom: 90px; right: 25px; width: 400px; height: 520px;
+      background: #fff; border: 1px solid #ccc; border-radius: 16px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25); z-index: 10000;
+      display: flex; flex-direction: column; overflow: hidden; font-family: Arial, sans-serif;
    }
-
+   
+   /* Header */
    .chatbot-header {
-      background: #45b1b7;
-      color: white;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      background: #45b1b7; color: white; padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between;
    }
+   .chatbot-header img { margin-right: 8px; }
+   .chatbot-header span { flex: 1; font-weight: bold; font-size: 16px; }
+   .chatbot-header button { background: transparent; border: none; color: white; font-size: 22px; cursor: pointer; }
+   
 
-   .chatbot-header img {
-      margin-right: 8px;
-   }
-
-   .chatbot-header span {
-      flex: 1;
-      font-weight: bold;
-      font-size: 16px;
-   }
-
-   .chatbot-header button {
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 22px;
-      cursor: pointer;
-   }
-
-   .chatbot-body {
-      flex: 1;
-      padding: 12px;
-      overflow-y: auto;
-      background: #f8f8f8;
-   }
-
-   .msg {
-      display: flex;
-      margin-bottom: 12px;
-   }
-
-   .msg.user {
-      justify-content: flex-end;
-   }
-
-   .msg.bot {
-      justify-content: flex-start;
-   }
-
+   
+   /* Chat Body */
+   .chatbot-body { flex: 1; padding: 12px; overflow-y: auto; background: #f8f8f8; -webkit-overflow-scrolling: touch; }
+   /* Allow selecting/copying text inside chatbot */
+   .chatbot-body, .chatbot-body * { user-select: text; }
+   .msg { display: flex; margin-bottom: 12px; }
+   .msg.user { justify-content: flex-end; }
+   .msg.bot { justify-content: flex-start; }
+   
    .bubble {
-      max-width: 75%;
-      padding: 10px 14px;
-      border-radius: 16px;
-      font-size: 14px;
-      line-height: 1.4;
-      word-wrap: break-word;
+      max-width: 75%; padding: 10px 14px; border-radius: 16px; font-size: 14px;
+      line-height: 1.5; word-wrap: break-word;
    }
-
-   .msg.user .bubble {
-      background: #e0e0e0;
-      border-radius: 16px 0 16px 16px;
-   }
-
-   .msg.bot .bubble {
-      background: #d1e7dd;
-      border-radius: 0 16px 16px 16px;
-   }
-
-   .chatbot-footer {
-      display: flex;
-      padding: 10px;
-      border-top: 1px solid #ddd;
-      background: #fff;
-   }
-
-   .input-wrapper {
-      position: relative;
-      flex: 1;
-      display: flex;
-      align-items: center;
-   }
-
-   #chat-input {
-      flex: 1;
-      padding: 10px 40px 10px 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      outline: none;
-      text-transform: none;
-   }
-
-   #send-button {
-      position: absolute;
-      right: 5px;
-      /* Adjust position as needed */
-      background-color: transparent;
-      border: none;
-      padding: 5px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-   }
-
-   #send-button img {
-      width: 24px;
-      /* Adjust icon size */
-      height: 24px;
-      /* Adjust icon size */
-      margin-bottom: 20px;
-   }
+   .msg.user .bubble { background: #e0e0e0; border-radius: 16px 0 16px 16px; }
+   .msg.bot .bubble { background: #d1e7dd; border-radius: 0 16px 16px 16px; }
+   .msg.bot .bubble a { color: #45b1b7; text-decoration: none; font-weight: 500; }
+   .msg.bot .bubble a:hover { text-decoration: underline; }
+   
+   /* Footer & Input */
+   .chatbot-footer { display: flex; padding: 10px; border-top: 1px solid #ddd; background: #fff; }
+   .input-wrapper { position: relative; flex: 1; height: 40px; display: block; }
+   #chat-input { width: 100%; padding: 10px 48px 10px 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; outline: none; text-transform: none; height: 40px; box-sizing: border-box; line-height: 20px; }
+   #send-button { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: transparent !important; border: 0 !important; outline: none; box-shadow: none; -webkit-appearance: none; appearance: none; width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; line-height: 0; cursor: pointer; margin-left: 0; }
+   #send-button:focus { outline: none; box-shadow: none; border: 0; }
+   #send-button img { width: 18px; height: 18px; margin: 0; pointer-events: none; display: block; border: 0 !important; }
+   
+   /* Quick Actions */
+   .quick-actions { margin: 15px 0; padding: 15px; background: #f0f8ff; border-radius: 12px; border-left: 4px solid #45b1b7; }
+   .quick-actions-header { font-weight: bold; color: #333; margin-bottom: 10px; font-size: 14px; }
+   .quick-actions-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+   .quick-action-btn { background: #45b1b7; color: white; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: all 0.3s ease; white-space: nowrap; }
+   .quick-action-btn:hover { background: #3a9ba0; transform: translateY(-1px); }
+   
+   /* Forms */
+   .tracking-form, .recommendations-form { padding: 20px; }
+   .tracking-form h4, .recommendations-form h4 { margin: 0 0 20px 0; color: #333; font-size: 16px; text-align: center; }
+   .form-group { margin-bottom: 15px; }
+   .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #555; font-size: 13px; }
+   .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; transition: border-color 0.3s ease; }
+   .form-group input:focus, .form-group select:focus { outline: none; border-color: #45b1b7; }
+   
+   .form-row { display: flex; gap: 10px; margin-bottom: 15px; }
+   .form-row .form-group { flex: 1; margin-bottom: 0; }
+   
+   .track-btn, .recommend-btn { width: 100%; padding: 12px; background: #45b1b7; color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.3s ease; }
+   .track-btn:hover, .recommend-btn:hover { background: #3a9ba0; }
+   
+   /* Results & States */
+   #track-result, #recommend-result { margin-top: 20px; padding: 15px; border-radius: 6px; font-size: 14px; }
+   .track-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+   .track-error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+   .recommend-success { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+   
+   /* Product Cards */
+   .product-card { background: white; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+   .product-card h5 { margin: 0 0 8px 0; color: #333; font-size: 14px; }
+   .product-card .product-details { font-size: 12px; color: #666; margin-bottom: 8px; }
+   .product-card .product-price { font-weight: bold; color: #45b1b7; font-size: 14px; }
+   .product-card a { color: #45b1b7; text-decoration: none; font-weight: 500; }
+   .product-card a:hover { text-decoration: underline; }
+   
+   /* Typing Indicator */
+   .typing-indicator .bubble { background: #e8f4f8 !important; color: #666; font-style: italic; }
+   
+       /* Discount Messages */
+    .msg.bot .bubble strong { color: #d63384; }
+    .msg.bot .bubble em { color: #6f42c1; }
+    .msg.bot .bubble br + br { margin-top: 8px; }
+    
+    /* Product Links */
+    .msg.bot .bubble a { color: #45b1b7; text-decoration: none; font-weight: 500; transition: all 0.3s ease; }
+    .msg.bot .bubble a:hover { color: #3a9ba0; text-decoration: underline; transform: translateY(-1px); }
+    .msg.bot .bubble strong a { color: #d63384; }
+    .msg.bot .bubble strong a:hover { color: #b02a37; }
 </style>
+
 <footer>
    <div class="container">
       <div class="row">
@@ -236,16 +195,13 @@
       </div>
    </div>
 </footer>
+
 <div class="cpy_">
-   <p class="mx-auto">© 2023 All Rights Reserved By <a href="https://dlong3907portfolio.onrender.com/"
-         target="_blank">longtech</a><br>
-
-      Distributed By <a href="https://dlong3907portfolio.onrender.com/" target="_blank">Duc Long</a>
-
-   </p>
+   <p class="mx-auto">© 2023 All Rights Reserved By <a href="https://dlong3907portfolio.onrender.com/" target="_blank">longtech</a><br>
+   Distributed By <a href="https://dlong3907portfolio.onrender.com/" target="_blank">Duc Long</a></p>
 </div>
+
 <script>
-   //thong bao dang nhap
    function checkToken() {
       event.preventDefault();
       Swal.fire({
@@ -262,18 +218,16 @@
       });
    }
 </script>
-<!-- jQery -->
+
+<!-- Scripts -->
 <script src="../../themes/frontend/js/jquery-3.4.1.min.js"></script>
-<!-- popper js -->
 <script src="../../themes/frontend/js/popper.min.js"></script>
-<!-- bootstrap js -->
 <script src="../../themes/frontend/js/bootstrap.js"></script>
-<!-- custom js -->
 <script src="../../themes/frontend/js/custom.js"></script>
-<!-- marked.js -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script>
+   // Chatbot Elements
    const chatToggle = document.getElementById("chatbot-toggle");
    const chatPopup = document.getElementById("chatbot-popup");
    const closeBtn = document.getElementById("chatbot-close");
@@ -282,93 +236,96 @@
    const chatLog = document.getElementById("chat-log");
    const clearChatBtn = document.getElementById("clear-chat");
 
-   chatToggle.addEventListener("click", () => {
-      chatPopup.style.display = "flex";
-      chatToggle.style.display = "none";
-      chatInput.focus();
-   });
-
-   closeBtn.addEventListener("click", () => {
-      chatPopup.style.display = "none";
-      chatToggle.style.display = "block";
-   });
-
-   chatForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const question = chatInput.value.trim();
-      if (!question) return;
-
-      appendMessage(question, "user");
-      chatInput.value = "";
-      chatInput.focus();
-
-      try {
-         const res = await fetch("/chatbot/ask-ai", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question })
-         });
-
-         const data = await res.json();
-
-         // Always show the AI's reply first, then show products if any
-         if (data.reply && data.reply.trim() !== "" && (!data.products || !Array.isArray(data.products) || data.products.length === 0 || data.reply.trim() !== (data.products[0]?.title || ""))) {
-            appendMessage(data.reply, "bot");
-         }
-         if (data.products && Array.isArray(data.products) && data.products.length > 0) {
-            data.products.forEach(product => {
-               appendProduct(product);
-            });
-         }
-      } catch (err) {
-         appendMessage("Error communicating with server.", "bot");
+   // Utility Functions
+   function getUserId() {
+      const user = localStorage.getItem('user') || sessionStorage.getItem('user');
+      if (user) {
+         try {
+            const userData = JSON.parse(user);
+            return userData._id || userData.id;
+         } catch (e) { console.log('Error parsing user data'); }
       }
-   });
-
-   // Chat history persistence using localStorage
-   function saveChatHistory() {
-      localStorage.setItem('chatbot_history', chatLog.innerHTML);
-   }
-   function restoreChatHistory() {
-      const history = localStorage.getItem('chatbot_history');
-      if (history) {
-         chatLog.innerHTML = history;
-         chatLog.scrollTop = chatLog.scrollHeight;
-      }
-   }
-   // Restore chat history on page load
-   restoreChatHistory();
-
-   function appendMessage(text, sender) {
-      const msg = document.createElement("div");
-      msg.className = `msg ${sender}`;
-      // Use marked to convert markdown to HTML
-      msg.innerHTML = `<div class="bubble">${marked.parse(text)}</div>`;
-      chatLog.appendChild(msg);
-      chatLog.scrollTop = chatLog.scrollHeight;
-      saveChatHistory();
+      return null;
    }
 
-   function appendProduct(product) {
-      const msg = document.createElement("div");
-      msg.className = "msg bot";
-      msg.innerHTML = `
-         <div class="bubble" style="padding: 10px;">
-            <strong>${product.title}</strong><br>
-            <img src="${product.image}" alt="${product.title}" style="max-width:100%;max-height:120px;display:block;margin:8px 0;">
-            <span>Giá: ${product.price.toLocaleString('vi-VN')} VND</span><br>
-            <span>${product.description || ""}</span>
-         </div>
-      `;
-      chatLog.appendChild(msg);
-      chatLog.scrollTop = chatLog.scrollHeight;
-      saveChatHistory();
-   }
+       function addQuickActions() {
+       const quickActions = document.createElement('div');
+       quickActions.className = 'quick-actions';
+       quickActions.innerHTML = `
+          <div class="quick-actions-header">💡 Bạn có thể hỏi:</div>
+          <div class="quick-actions-buttons">
+             <button class="quick-action-btn" onclick="askQuickQuestion('Tôi muốn xem đơn hàng của mình')">📋 Xem đơn hàng</button>
+             <button class="quick-action-btn" onclick="askQuickQuestion('Gợi ý sản phẩm cho tôi')">🎯 Gợi ý sản phẩm</button>
+             <button class="quick-action-btn" onclick="askQuickQuestion('Giỏ hàng của tôi có gì?')">🛒 Giỏ hàng</button>
+             <button class="quick-action-btn" onclick="askQuickQuestion('Sản phẩm nào đang giảm giá?')">💰 Sản phẩm giảm giá</button>
+          </div>
+       `;
+       
+       const welcomeMsg = chatLog.querySelector('.msg.bot');
+       if (welcomeMsg) welcomeMsg.after(quickActions);
+    }
+
+       function askQuickQuestion(question) {
+       // Special handling for discount questions
+        if (question.includes('giảm giá') || question.includes('discount') || question.includes('sale')) {
+           // Append the user's quick question to the chat, then show typing indicator
+           appendMessage(question, 'user');
+           showTypingIndicator();
+          
+          // Fetch discount products directly
+          fetch('/chatbot/discounts')
+             .then(response => response.json())
+             .then(data => {
+                removeTypingIndicator();
+                                if (data.products && data.products.length > 0) {
+                    let reply = `🔥 **${data.total} sản phẩm đang giảm giá!**\n\n`;
+                    data.products.forEach(p => {
+                       reply += `**<a href="/product_details/${p.id}" target="_blank">${p.title}</a>**\n`;
+                       reply += `💰 Giá gốc: ${p.originalPrice.toLocaleString()}đ\n`;
+                       reply += `🎯 Giá giảm: ${p.discountPrice.toLocaleString()}đ\n`;
+                       reply += `💸 Tiết kiệm: ${p.savings.toLocaleString()}đ (${p.discountPercentage}%)\n`;
+                       reply += `📏 Size: ${p.size} | 🎨 Màu: ${p.color} | 📦 Còn: ${p.stock}\n\n`;
+                    });
+                    reply += `💡 *Bạn có muốn xem chi tiết sản phẩm nào không?*`;
+                    appendMessage(reply, 'bot');
+                } else {
+                   appendMessage('Hiện tại không có sản phẩm nào đang giảm giá. Hãy quay lại sau nhé! 😊', 'bot');
+                }
+             })
+             .catch(error => {
+                removeTypingIndicator();
+                console.error('Error fetching discounts:', error);
+                appendMessage('Xin lỗi, có lỗi xảy ra khi lấy thông tin sản phẩm giảm giá.', 'bot');
+             });
+       }
+       else {
+          chatInput.value = question;
+          chatForm.dispatchEvent(new Event('submit'));
+       }
+    }
+
+       function appendMessage(text, sender) {
+       const messageDiv = document.createElement("div");
+       messageDiv.className = `msg ${sender}`;
+       
+       // Convert markdown-style formatting to HTML and preserve existing HTML links
+       let htmlText = text
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold text
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')              // Italic text
+          .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>')  // Markdown links
+          .replace(/\n/g, '<br>');                           // Line breaks
+       
+       // Ensure the text is treated as HTML (links from backend will work)
+       messageDiv.innerHTML = `<div class="bubble">${htmlText}</div>`;
+       chatLog.appendChild(messageDiv);
+       chatLog.scrollTop = chatLog.scrollHeight;
+       saveChatHistory();
+    }
 
    function showTypingIndicator() {
       const typing = document.createElement("div");
       typing.className = "msg bot typing-indicator";
-      typing.innerHTML = `<div class="bubble"><em>Bot is typing...</em></div>`;
+      typing.innerHTML = `<div class="bubble"><em>Bot đang nhập...</em></div>`;
       typing.id = "typing-indicator";
       chatLog.appendChild(typing);
       chatLog.scrollTop = chatLog.scrollHeight;
@@ -379,8 +336,260 @@
       if (typing) typing.remove();
    }
 
+   function saveChatHistory() {
+      localStorage.setItem('chatbot_history', chatLog.innerHTML);
+      localStorage.setItem('chat_scrollTop', String(chatLog.scrollTop || 0));
+   }
+
+   function restoreChatHistory() {
+      const history = localStorage.getItem('chatbot_history');
+      if (history) {
+         chatLog.innerHTML = history;
+         const savedScroll = parseInt(localStorage.getItem('chat_scrollTop') || '0', 10);
+         chatLog.scrollTop = isNaN(savedScroll) ? chatLog.scrollHeight : savedScroll;
+      }
+   }
+
+   function getConversationContext() {
+      const messages = chatLog.querySelectorAll('.msg');
+      const context = [];
+      const recentMessages = Array.from(messages).slice(-6);
+      
+      recentMessages.forEach(msg => {
+         const bubble = msg.querySelector('.bubble');
+         if (bubble) {
+            const content = bubble.textContent || bubble.innerText;
+            const role = msg.classList.contains('user') ? 'user' : 'assistant';
+            context.push({ role, content });
+         }
+      });
+      return context;
+   }
+
+   // Event Listeners
+   chatToggle.addEventListener("click", () => {
+      chatPopup.style.display = "flex";
+      chatToggle.style.display = "none";
+      localStorage.setItem('chatbot_open', '1');
+      chatInput.focus();
+      
+      if (!document.querySelector('.quick-actions')) {
+         setTimeout(addQuickActions, 500);
+      }
+   });
+
+   closeBtn.addEventListener("click", () => {
+      chatPopup.style.display = "none";
+      chatToggle.style.display = "block";
+      localStorage.setItem('chatbot_open', '0');
+   });
+
+   chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const question = chatInput.value.trim();
+      if (!question) return;
+
+      appendMessage(question, "user");
+      chatInput.value = "";
+      chatInput.focus();
+      showTypingIndicator();
+
+      try {
+         const conversationContext = getConversationContext();
+         const userId = getUserId();
+         
+         const res = await fetch("/chatbot/ask-ai", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question, conversationContext, userId })
+         });
+
+         removeTypingIndicator();
+                   const data = await res.json();
+
+          if (data.reply && data.reply.trim() !== "") {
+             appendMessage(data.reply, "bot");
+          }
+      } catch (err) {
+         removeTypingIndicator();
+         appendMessage("Xin lỗi, có lỗi xảy ra khi kết nối với máy chủ.", "bot");
+      }
+   });
+
    clearChatBtn.addEventListener("click", () => {
       chatLog.innerHTML = "";
       localStorage.removeItem("chatbot_history");
+      
+      setTimeout(() => {
+         const welcomeMsg = document.createElement('div');
+         welcomeMsg.className = 'msg bot';
+         welcomeMsg.innerHTML = '<div class="bubble">Xin chào! Tôi có thể hỗ trợ gì cho bạn?</div>';
+         chatLog.appendChild(welcomeMsg);
+         addQuickActions();
+      }, 100);
+   });
+
+   // Persist input text across pages
+   chatInput.addEventListener('input', () => {
+      localStorage.setItem('chat_input_value', chatInput.value);
+   });
+
+   // Initialize
+   restoreChatHistory();
+   const wasOpen = localStorage.getItem('chatbot_open') === '1';
+   if (wasOpen) {
+      chatPopup.style.display = 'flex';
+      chatToggle.style.display = 'none';
+   }
+   const savedInput = localStorage.getItem('chat_input_value');
+   if (typeof savedInput === 'string') chatInput.value = savedInput;
+
+   chatLog.addEventListener('scroll', () => {
+      localStorage.setItem('chat_scrollTop', String(chatLog.scrollTop || 0));
+   });
+
+   // Tab functionality and forms
+   document.addEventListener('DOMContentLoaded', function() {
+      // Tab switching
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      const tabContents = document.querySelectorAll('.tab-content');
+      
+      tabBtns.forEach(btn => {
+         btn.addEventListener('click', () => {
+            const targetTab = btn.getAttribute('data-tab');
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(`${targetTab}-tab`).classList.add('active');
+         });
+      });
+      
+      // Order tracking form
+      const trackForm = document.getElementById('track-form');
+      if (trackForm) {
+         trackForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const orderCode = document.getElementById('order-code').value;
+            const email = document.getElementById('order-email').value;
+            const resultDiv = document.getElementById('track-result');
+            
+            try {
+               const response = await fetch('/chatbot/track-order', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ orderCode, email })
+               });
+               
+               const data = await response.json();
+               
+               if (data.found) {
+                  const order = data.order;
+                  resultDiv.innerHTML = `
+                     <div class="track-success">
+                        <h5>✅ Đơn hàng tìm thấy!</h5>
+                        <p><strong>Mã đơn hàng:</strong> ${order.orderCode}</p>
+                        <p><strong>Trạng thái:</strong> ${order.status}</p>
+                        <p><strong>Thanh toán:</strong> ${order.paymentStatus}</p>
+                        <p><strong>Tổng tiền:</strong> ${order.totalAmount.toLocaleString()}đ</p>
+                        <p><strong>Ngày đặt:</strong> ${new Date(order.orderDate).toLocaleDateString('vi-VN')}</p>
+                        <hr>
+                        <h6>Sản phẩm:</h6>
+                        ${order.items.map(item => `
+                           <div class="product-card">
+                              <h5>${item.name}</h5>
+                              <div class="product-details">
+                                 Số lượng: ${item.quantity} | Giá: ${item.price.toLocaleString()}đ
+                              </div>
+                              <div class="product-price">
+                                 Tổng: ${item.total.toLocaleString()}đ
+                              </div>
+                           </div>
+                        `).join('')}
+                     </div>
+                  `;
+               } else {
+                  resultDiv.innerHTML = `
+                     <div class="track-error">
+                        <p>❌ ${data.message}</p>
+                        <p>Vui lòng kiểm tra lại mã đơn hàng và email.</p>
+                     </div>
+                  `;
+               }
+            } catch (err) {
+               resultDiv.innerHTML = `
+                  <div class="track-error">
+                     <p>❌ Có lỗi xảy ra khi tra cứu đơn hàng. Vui lòng thử lại sau.</p>
+          </div>
+       `;
+            }
+         });
+      }
+      
+      // Product recommendations form
+      const recommendForm = document.getElementById('recommend-form');
+      if (recommendForm) {
+         recommendForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+                         const style = document.getElementById('rec-style').value;
+             const size = document.getElementById('rec-size').value;
+             const color = document.getElementById('rec-color').value;
+             const gender = document.getElementById('rec-gender').value;
+             const material = document.getElementById('rec-material').value;
+             const resultDiv = document.getElementById('recommend-result');
+             const userId = getUserId();
+             
+             try {
+                const response = await fetch('/chatbot/get-recommendations', {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ userId, style, size, color, gender, material })
+                });
+               
+               const data = await response.json();
+               
+               if (data.recommendations && data.recommendations.length > 0) {
+                  resultDiv.innerHTML = `
+                     <div class="recommend-success">
+                        <h5>🎯 ${data.recommendations.length} sản phẩm phù hợp</h5>
+                        ${data.recommendations.map(product => `
+                           <div class="product-card">
+                              <h5>${product.title}</h5>
+                                                             <div class="product-details">
+                                  ${product.style ? `Phong cách: ${product.style} | ` : ''}
+                                  ${product.size ? `Kích thước: ${product.size} | ` : ''}
+                                  ${product.color ? `Màu: ${product.color} | ` : ''}
+                                  ${product.gender ? `Giới tính: ${product.gender} | ` : ''}
+                                  ${product.materials && product.materials.length > 0 ? `Chất liệu: ${product.materials.map(m => `${m.material} (${m.percentage}%)`).join(', ')}` : ''}
+                               </div>
+                              <div class="product-price">
+                                 ${product.discount_price > 0 ? 
+                                    `Giá: ${product.discount_price.toLocaleString()}đ <span style="text-decoration: line-through; color: #999;">${product.price.toLocaleString()}đ</span>` : 
+                                    `Giá: ${product.price.toLocaleString()}đ`
+                                 }
+                              </div>
+                              <a href="/product_details/${product._id}" target="_blank">Xem chi tiết →</a>
+                           </div>
+                        `).join('')}
+                     </div>
+                  `;
+               } else {
+                  resultDiv.innerHTML = `
+                     <div class="track-error">
+                        <p>❌ Không tìm thấy sản phẩm phù hợp với tiêu chí của bạn.</p>
+                        <p>Vui lòng thử bỏ bớt các bộ lọc hoặc chọn phong cách khác.</p>
+                     </div>
+                  `;
+               }
+            } catch (err) {
+               resultDiv.innerHTML = `
+                  <div class="track-error">
+                     <p>❌ Có lỗi xảy ra khi tìm kiếm gợi ý. Vui lòng thử lại sau.</p>
+                  </div>
+               `;
+            }
+         });
+      }
    });
 </script>
