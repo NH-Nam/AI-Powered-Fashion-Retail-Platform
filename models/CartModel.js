@@ -22,6 +22,15 @@ var CartSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'users'
     },
+    // Optional variant selections for a Shopee-like UX
+    selected_size: {
+        type: String,
+        default: ''
+    },
+    selected_color: {
+        type: String,
+        default: ''
+    },
 });
 
 //Export the model
