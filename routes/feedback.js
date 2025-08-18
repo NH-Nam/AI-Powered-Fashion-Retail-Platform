@@ -26,7 +26,7 @@ router.get('/', admin, async (req, res) => {
     //session alert
     const message = req.session ? req.session.message : null;
     delete req.session.message; // Xóa thông báo khỏi session
-    res.render('admin/feedback', { title: 'Manage Feedbacks', user, feedbacks, formatDate, message, feeds, formatTimeFeedback })
+    res.render('admin/feedback', { title: 'Manage Feedbacks', user, feedbacks, formatDate, message, feeds, formatTimeFeedback, path: 'feedback' })
 })
 
 router.post('/search', admin, async (req, res) => {
@@ -43,7 +43,7 @@ router.post('/search', admin, async (req, res) => {
     //session alert
     const message = req.session ? req.session.message : null;
     delete req.session.message; // Xóa thông báo khỏi session
-    res.render('admin/feedback', { title: 'Manage Feedbacks', user, feedbacks, formatDate, message, feeds, formatTimeFeedback })
+    res.render('admin/feedback', { title: 'Manage Feedbacks', user, feedbacks, formatDate, message, feeds, formatTimeFeedback, path: 'feedback' })
 })
 
 router.get('/markRead/:id', admin, async (req, res) => {

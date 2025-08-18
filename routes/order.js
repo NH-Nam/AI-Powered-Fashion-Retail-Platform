@@ -3,6 +3,7 @@ var router = express.Router();
 var Order = require('../models/OrderModel');
 var OrderDetail = require('../models/OrderDetailModel');
 var Feedback = require('../models/FeedbackModel');
+var Product = require('../models/ProductModel');
 
 //dung chung
 var User = require('../models/UserModel');
@@ -32,7 +33,7 @@ router.get('/', admin, async (req, res) => {
     const message = req.session ? req.session.message : null;
     delete req.session.message; // Xóa thông báo khỏi session
 
-    res.render('admin/order', { title: 'Manage Order', user, message, orders, feeds, formatTimeFeedback, totalOrder })
+res.render('admin/order', { title: 'Manage Order', user, message, orders, feeds, formatTimeFeedback, totalOrder, path: 'order' })
 })
 
 //search
@@ -95,6 +96,32 @@ router.get('/delivered/:id', admin, async (req, res) => {
         res.redirect('/order')
     }
 })
+
+// Admin-only: cancel an order (keep details; mark delivery_status = 'Cancelled')
+router.get('/cancel/:id', admin, async (req, res) => {
+    try {
+        const id = req.params.id;
+        await Order.findByIdAndUpdate(id, { delivery_status: 'Cancelled' });
+        // Restock products for this order
+        const details = await OrderDetail.find({ order_id: id, deleted: 0 });
+        for (const d of details) {
+            try {
+                await Product.findByIdAndUpdate(d.product_id, { $inc: { quantity: d.num } });
+            } catch {}
+        }
+        req.session.message = {
+            type: 'success',
+            content: 'Order cancelled successfully'
+        };
+        res.redirect('/order');
+    } catch (error) {
+        req.session.message = {
+            type: 'danger',
+            content: 'Order cancellation failed'
+        };
+        res.redirect('/order');
+    }
+});
 
 router.get('/delete/:id', admin, async (req, res) => {
     try {

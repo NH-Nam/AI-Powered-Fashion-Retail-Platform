@@ -25,7 +25,7 @@ router.get('/', admin, async (req, res) => {
     //session alert
     const message = req.session ? req.session.message : null;
     delete req.session.message; // Xóa thông báo khỏi session
-    res.render('admin/category', { title: 'View Categories', categories, category, message, user, feeds, formatTimeFeedback });
+    res.render('admin/category', { title: 'View Categories', categories, category, message, user, feeds, formatTimeFeedback, path: 'category' });
 });
 
 router.post('/search',async (req, res) => {
@@ -43,7 +43,7 @@ router.post('/search',async (req, res) => {
     //session alert
     const message = req.session ? req.session.message : null;
     delete req.session.message; // Xóa thông báo khỏi session
-    res.render('admin/category', { title: 'View Categories', categories, category, message, user, feeds, formatTimeFeedback });
+    res.render('admin/category', { title: 'View Categories', categories, category, message, user, feeds, formatTimeFeedback, path: 'category' });
 });
 
 // create category
@@ -77,7 +77,7 @@ router.get('/edit/:id', admin, async (req, res) => {
     //session alert
     const message = req.session ? req.session.message : null;
     delete req.session.message; // Xóa thông báo khỏi session
-    res.render('admin/category', { title: 'View Categories', categories, category, message, user, feeds, formatTimeFeedback });
+    res.render('admin/category', { title: 'View Categories', categories, category, message, user, feeds, formatTimeFeedback, path: 'category' });
 });
 
 router.post('/edit/:id', async (req, res) => {

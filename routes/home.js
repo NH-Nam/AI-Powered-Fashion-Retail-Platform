@@ -21,6 +21,55 @@ var { sendInformationEmail } = require('../utils/Email');
 //thu viện gửi mail
 const nodemailer = require('nodemailer');
 
+// Test route to verify API is working
+router.get('/api/test', (req, res) => {
+  console.log('Test API endpoint hit');
+  res.header('Access-Control-Allow-Origin', '*');
+  res.json({ success: true, message: 'API is working!', timestamp: new Date().toISOString() });
+});
+
+// Simple product list API for testing
+router.get('/api/products', async (req, res) => {
+  console.log('Products API endpoint hit');
+  try {
+    const products = await ProductModel.find({ deleted: 0 }).limit(5).select('_id title price');
+    res.header('Access-Control-Allow-Origin', '*');
+    res.json({ success: true, data: products });
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch products' });
+  }
+});
+
+// API endpoint to get product details for Buy Now popup (moved to top for priority)
+router.get('/api/product/:id', async (req, res) => {
+  console.log('API endpoint hit: /api/product/', req.params.id); // Debug log
+  
+  // Set CORS headers
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  
+  try {
+    // Validate product ID
+    if (!req.params.id || req.params.id.length !== 24) {
+      return res.status(400).json({ success: false, message: 'Invalid product ID format' });
+    }
+    
+    const product = await ProductModel.findOne({ _id: req.params.id, deleted: 0 });
+    console.log('Product found:', product ? 'Yes' : 'No'); // Debug log
+    
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    
+    res.json({ success: true, data: product });
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch product details' });
+  }
+});
+
 /* GET home page. */
 router.get('/', async (req, res) => {
   const page = parseInt(req.query.page) || 1; // Số trang hiện tại, mặc định là 1
@@ -31,7 +80,6 @@ router.get('/', async (req, res) => {
     const products = await ProductModel.find({ deleted: 0 }).sort({ updated_at: 'desc' }).skip(skip).limit(limit);
     const totalProducts = await ProductModel.countDocuments({ deleted: 0 });
     const totalPages = Math.ceil(totalProducts / limit);
-
 
     var CartNum = 0;
     var userType = 'User';
@@ -44,7 +92,7 @@ router.get('/', async (req, res) => {
       }
     }
 
-    res.render('frontend/userpage', { title: 'Home', products, page, totalPages, token, CartNum, numberFormat, userType });
+    res.render('frontend/userpage', { title: 'Home', products, page, totalPages, token, CartNum, numberFormat, userType, current: 'home' });
   } catch (err) {
     // Xử lý lỗi tại đây
     res.status(500).send(err.message);
@@ -73,7 +121,7 @@ router.get('/products', async (req, res) => {
       }
     }
 
-    res.render('frontend/all_product', { title: 'All Products', products, page, totalPages, token, CartNum, numberFormat, userType });
+    res.render('frontend/all_product', { title: 'All Products', products, page, totalPages, token, CartNum, numberFormat, userType, current: 'products' });
   } catch (err) {
     // Xử lý lỗi tại đây
     res.status(500).send(err.message);
@@ -102,7 +150,7 @@ router.post('/search', async (req, res) => {
       }
     }
     var products = await ProductModel.find({ title: new RegExp(search, "i") })
-    res.render('frontend/userpage', { title: 'Home', products, page, totalPages, token, CartNum, numberFormat, userType });
+    res.render('frontend/userpage', { title: 'Home', products, page, totalPages, token, CartNum, numberFormat, userType, current: 'home' });
   } catch (error) {
 
   }
@@ -130,7 +178,7 @@ router.post('/seachProduct', async (req, res) => {
       }
     }
     var products = await ProductModel.find({ title: new RegExp(search, "i") })
-    res.render('frontend/all_product', { title: 'All Products', products, page, totalPages, token, CartNum, numberFormat, userType });
+    res.render('frontend/all_product', { title: 'All Products', products, page, totalPages, token, CartNum, numberFormat, userType, current: 'products' });
   } catch (err) {
     // Xử lý lỗi tại đây
     res.status(500).send(err.message);
@@ -158,6 +206,30 @@ router.get('/product_details/:id', async (req, res) => {
     var id = req.params.id;
     var token = req.cookies.token;
     var product = await ProductModel.findById(id);
+    // Auto-migrate legacy standalone size/color/quantity into a single variant if needed
+    try {
+      if (product && (!Array.isArray(product.variants) || product.variants.length === 0)) {
+        const legacySize = typeof product.size === 'string' ? product.size : '';
+        const legacyColor = typeof product.color === 'string' ? product.color : '';
+        const legacyQty = Number.isFinite(product.quantity) ? product.quantity : 0;
+        if (legacySize || legacyColor || legacyQty > 0) {
+          const variant = { quantity: legacyQty || 0 };
+          if (legacySize && legacySize.trim() !== '') variant.size = legacySize;
+          if (legacyColor && legacyColor.trim() !== '') variant.color = legacyColor;
+          const variants = [variant];
+          await ProductModel.findByIdAndUpdate(id, {
+            variants,
+            size: '',
+            color: '',
+            quantity: variants.reduce((s, v) => s + (parseInt(v.quantity, 10) || 0), 0)
+          }, { runValidators: true });
+          product.variants = variants;
+          product.size = '';
+          product.color = '';
+          product.quantity = variants[0].quantity;
+        }
+      }
+    } catch (e) { /* non-fatal */ }
     // Lấy danh sách sản phẩm liên quan (cùng danh mục và khác sản phẩm hiện tại)
     var productList = await ProductModel.find({
       category: product.category,
@@ -193,7 +265,7 @@ router.get('/product_details/:id', async (req, res) => {
       .sort({ created_at: 'desc' }) // Sắp xếp theo created_at giảm dần
       // .populate('user_id')
       .exec();
-    res.render('frontend/product_details', { title: 'Product Details', product, productList, token, CartNum, numberFormat, comments, orders, userType, replies, formatTimeFeedback, favorite });
+  res.render('frontend/product_details', { title: 'Product Details', product, productList, token, CartNum, numberFormat, comments, orders, userType, replies, formatTimeFeedback, favorite, current: 'products' });
   } catch (error) {
     console.error(error)
   }
@@ -215,7 +287,7 @@ router.get('/profile', user, async (req, res) => {
     }
   }
 
-  res.render('frontend/profile', { title: 'Profile', user, CartNum, token, userType });
+  res.render('frontend/profile', { title: 'Profile', user, CartNum, token, userType, current: 'account' });
 })
 
 router.post('/profile/edit', async (req, res) => {
@@ -237,29 +309,53 @@ router.post('/add_cart/:id', async (req, res) => {
     var user = await User.findById(decoded.userId);
     var product = await ProductModel.findOne({ _id: req.params.id });
     try {
-      var cart = await Cart.findOne({ product_id: req.params.id, user_id: user._id })
+      var cart = await Cart.findOne({ product_id: req.params.id, user_id: user._id, selected_color: req.body.selected_color || '', selected_size: req.body.selected_size || '' })
       var purchaseQuantity = parseInt(req.body.quantity, 10)
-      if (product.quantity >= parseInt(req.body.quantity, 10)) {
+      // If variants exist, check the specific variant stock; else fall back to product.quantity
+      let canFulfill = false;
+      if (Array.isArray(product.variants) && product.variants.length) {
+        const v = product.variants.find(v => v.size === (req.body.selected_size || '') && v.color === (req.body.selected_color || ''));
+        if (v && v.quantity >= purchaseQuantity) canFulfill = true;
+      } else {
+        if (product.quantity >= purchaseQuantity) canFulfill = true;
+      }
+
+      if (canFulfill) {
         if (cart) {
-          // If the cart exists, update the quantity
+          // If the cart exists, update the quantity and recompute totals using stored unit price
           cart.quantity += purchaseQuantity;
           cart.total_price = cart.price * cart.quantity;
           await cart.save();;
         } else {
           // If the cart doesn't exist, create a new one
+          const unitPrice = (product.discount_price && product.discount_price < product.price)
+            ? product.discount_price
+            : product.price;
           const newCart = new Cart({
-            user_id: user._id,  // Fix the variable name here
-            price: product.discount_price ? product.discount_price : product.price,
+            user_id: user._id,
+            price: unitPrice,
             product_id: product._id,
-            quantity: req.body.quantity,
-            total_price: product.price * req.body.quantity
+            quantity: purchaseQuantity,
+            total_price: unitPrice * purchaseQuantity,
+            selected_color: req.body.selected_color || '',
+            selected_size: req.body.selected_size || ''
           });
 
           await newCart.save();
         }
-        //cập nhật số lượng sản phẩm
-        product.quantity -= parseInt(req.body.quantity, 10);
-        await product.save();
+        // Update stock: variant-first, else global product quantity
+        if (Array.isArray(product.variants) && product.variants.length) {
+          const idx = product.variants.findIndex(v => v.size === (req.body.selected_size || '') && v.color === (req.body.selected_color || ''));
+          if (idx >= 0) {
+            product.variants[idx].quantity -= purchaseQuantity;
+          }
+          // Also update global quantity as sum of variants
+          product.quantity = product.variants.reduce((sum, v) => sum + (v.quantity || 0), 0);
+          await product.save();
+        } else {
+          product.quantity -= purchaseQuantity;
+          await product.save();
+        }
       }
 
       res.redirect('/product_details/' + req.params.id);
@@ -283,18 +379,21 @@ router.post('/addcart/:id', async (req, res) => {
       var cart = await Cart.findOne({ product_id: req.params.id, user_id: user._id })
       if (product.quantity >= 1) {
         if (cart) {
-          // If the cart exists, update the quantity
+          // If the cart exists, update the quantity and recompute totals using stored unit price
           cart.quantity += 1;
           cart.total_price = cart.price * cart.quantity;
           await cart.save();;
         } else {
           // If the cart doesn't exist, create a new one
+          const unitPriceQuick = (product.discount_price && product.discount_price < product.price)
+            ? product.discount_price
+            : product.price;
           const newCart = new Cart({
-            user_id: user._id,  // Fix the variable name here
-            price: product.discount_price ? product.discount_price : product.price,
+            user_id: user._id,
+            price: unitPriceQuick,
             product_id: product._id,
-            quantity: req.body.quantity,
-            total_price: product.price
+            quantity: 1,
+            total_price: unitPriceQuick
           });
 
           await newCart.save();
@@ -323,6 +422,21 @@ router.get('/cart', user, async (req, res) => {
     userType = decoded.usertype;
     var user = await User.findById(decoded.userId);
     var carts = await Cart.find({ user_id: decoded.userId }).populate('user_id').populate('product_id');
+
+    // Recompute and persist totals to reflect current discounts
+    try {
+      await Promise.all(carts.map(async (c) => {
+        const p = c.product_id;
+        if (!p) return;
+        const effectiveUnitPrice = (p.discount_price && p.discount_price < p.price) ? p.discount_price : p.price;
+        const expectedTotal = effectiveUnitPrice * c.quantity;
+        if (c.price !== effectiveUnitPrice || c.total_price !== expectedTotal) {
+          c.price = effectiveUnitPrice;
+          c.total_price = expectedTotal;
+          await c.save();
+        }
+      }));
+    } catch (e) { /* ignore display-only correction */ }
     //session alert
     const message = req.session ? req.session.message : null;
     delete req.session.message; // Xóa thông báo khỏi session
@@ -330,7 +444,7 @@ router.get('/cart', user, async (req, res) => {
     for (let item of carts) {
       CartNum += item.quantity;
     }
-    res.render('frontend/showcart', { title: 'Cart', user, carts, CartNum, token, numberFormat, message, userType });
+    res.render('frontend/showcart', { title: 'Cart', user, carts, CartNum, token, numberFormat, message, userType, current: 'orders' });
   }
 })
 
@@ -522,7 +636,7 @@ router.get('/stripe', user, async (req, res) => {
   //session alert
   const message = req.session ? req.session.message : null;
   delete req.session.message; // Xóa thông báo khỏi session
-  res.render('frontend/stripe', { title: 'Payment Online', token, CartNum, user, totalMoney, message, numberFormat, key, userType });
+  res.render('frontend/stripe', { title: 'Payment Online', token, CartNum, user, totalMoney, message, numberFormat, key, userType, current: 'orders' });
 })
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET);
@@ -634,39 +748,45 @@ router.get('/orders', user, async (req, res) => {
   //session alert
   const message = req.session ? req.session.message : null;
   delete req.session.message; // Xóa thông báo khỏi session
-  res.render('frontend/order', { title: 'My Order', token, orders, CartNum, numberFormat, message, userType })
+  res.render('frontend/order', { title: 'My Order', token, orders, CartNum, numberFormat, message, userType, current: 'orders' })
 })
 
-//cancel order
-router.get('/cancel_order/:id', user, async (req, res) => {
-  try {
-    const id = req.params.id;
-    console.log('ID:', id);
-    await Order.findByIdAndUpdate(id, { delivery_status: 'Cancelled' })
-    req.session.message = {
-      type: 'success',
-      content: 'Order cancelled successfully!'
-    }
-    res.redirect('/orders')
-  } catch (error) {
-    // console.log(error)
-    req.session.message = {
-      type: 'danger',
-      content: 'Cancel order failed!'
-    }
-    res.redirect('/orders')
-  }
-})
-
+//delete order
 router.get('/delete_orders/:id', user, async (req, res) => {
   try {
     var id = req.params.id;
-    await OrderDetail.findByIdAndUpdate(id, { deleted: 1 })
-    req.session.message = {
-      type: 'success',
-      content: 'Order deleted successfully!'
+    // Find the order detail to get the parent order ID
+    const orderDetail = await OrderDetail.findByIdAndUpdate(id, { deleted: 1 });
+    if (!orderDetail) throw new Error('Order detail not found');
+    const orderId = orderDetail.order_id;
+
+    // Recalculate the order's total_money
+    const remainingDetails = await OrderDetail.find({ order_id: orderId, deleted: 0 });
+    if (remainingDetails.length === 0) {
+      // If no products left, delete the order
+      await Order.findByIdAndDelete(orderId);
+      // Restock the deleted item when removing last detail as well
+      try {
+        const prod = await ProductModel.findById(orderDetail.product_id);
+        if (prod) await ProductModel.findByIdAndUpdate(orderDetail.product_id, { $inc: { quantity: orderDetail.num } });
+      } catch {}
+      req.session.message = {
+        type: 'success',
+        content: 'Product deleted and order removed (no products left)!'
+      }
+    } else {
+      // Otherwise, update the order's total_money
+      const newTotal = remainingDetails.reduce((sum, d) => sum + d.total_money, 0);
+      await Order.findByIdAndUpdate(orderId, { total_money: newTotal });
+      // Restock the deleted item
+      try {
+        await ProductModel.findByIdAndUpdate(orderDetail.product_id, { $inc: { quantity: orderDetail.num } });
+      } catch {}
+      req.session.message = {
+        type: 'success',
+        content: 'Product deleted from order!'
+      }
     }
-    console.log(id)
     res.redirect('/orders')
   } catch (error) {
     console.log(error)
@@ -677,6 +797,8 @@ router.get('/delete_orders/:id', user, async (req, res) => {
     res.redirect('/orders')
   }
 })
+
+// Note: User-initiated cancellation disabled; only admins can cancel in /order routes.
 
 //contact
 router.get('/contact', user, async (req, res) => {
@@ -695,7 +817,7 @@ router.get('/contact', user, async (req, res) => {
       CartNum += item.quantity;
     }
   }
-  res.render('frontend/contact', { title: 'Contact', user, token, CartNum, message, userType });
+  res.render('frontend/contact', { title: 'Contact', user, token, CartNum, message, userType, current: 'contact' });
 
 })
 
@@ -804,7 +926,7 @@ router.get('/favorite', user, async (req, res) => {
     const message = req.session ? req.session.message : null;
     delete req.session.message; // Xóa thông báo khỏi session
 
-    res.render('frontend/favorite', { title: 'My Favorite', token, CartNum, user, favorite, numberFormat, totalPages, page, userType });
+    res.render('frontend/favorite', { title: 'My Favorite', token, CartNum, user, favorite, numberFormat, totalPages, page, userType, current: 'account' });
   }
 })
 
@@ -945,6 +1067,7 @@ router.get('/vnpay-return', async function (req, res) {
         });
         await order.save();
 
+        // Tạo các chi tiết đơn hàng
         for (const item of cartItems) {
           const orderDetail = new OrderDetail({
             order_id: order._id,
