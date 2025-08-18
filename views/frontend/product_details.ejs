@@ -18,6 +18,28 @@
          width: 100%; 
          font-size: 30px;
       }
+      /* Shopee-like variant chips */
+      .variant-group { margin: 12px 0 4px 0; }
+      .variant-label { font-weight: 600; margin-bottom: 6px; display: block; }
+      .variant-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+      .variant-chip {
+         padding: 8px 12px;
+         border: 1px solid #e0dede;
+         border-radius: 4px;
+         background: #fff;
+         cursor: pointer;
+         user-select: none;
+      }
+      .variant-chip.selected {
+         border-color: #ff5722;
+         color: #ff5722;
+         font-weight: 600;
+         background: #fff7f3;
+      }
+      .variant-chip.disabled {
+         opacity: 0.5;
+         cursor: not-allowed;
+      }
       .card-inner {
         margin-left: 4rem;
       }
@@ -101,13 +123,82 @@
                      </li>
                   </ul>
                   <p style="color: red; font-size: 30px; margin-top: 15px; margin-bottom: 15px;">
-                    <%= (product.discount_price > 0) ? numberFormat(product.discount_price) : numberFormat(product.price) %> VNDC</p>
+                   <%= (product.discount_price > 0) ? numberFormat(product.discount_price) : numberFormat(product.price) %> VND</p>
                   <p
                      style="color: grey; font-size: 15px; margin-top: 15px; margin-bottom: 15px; text-decoration: line-through;">
-                     <del><%= numberFormat(product.price) %> VNDC</del>
+                     <del><%= numberFormat(product.price) %> VND</del>
                   </p>
+
+                  <!-- Fashion Attributes Section -->
+                  <div class="fashion-attributes" style="margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
+                     <h5 style="margin-bottom: 15px; color: #333;">Product Details</h5>
+                     <div class="row">
+                        <% if(product.brand) { %>
+                        <div class="col-md-6 mb-2">
+                           <strong>Brand:</strong> <%= product.brand %>
+                        </div>
+                        <% } %>
+                        <% if(product.size) { %>
+                        <div class="col-md-6 mb-2">
+                           <strong>Size:</strong> <%= product.size %>
+                        </div>
+                        <% } %>
+                        <% if(product.color) { %>
+                        <div class="col-md-6 mb-2">
+                           <strong>Color:</strong> <%= product.color %>
+                        </div>
+                        <% } %>
+                        <% if(product.material) { %>
+                        <div class="col-md-6 mb-2">
+                           <strong>Material:</strong> <%= product.material %>
+                        </div>
+                        <% } %>
+                        <% if(product.materials && product.materials.length > 0) { %>
+                        <div class="col-md-6 mb-2">
+                           <strong>Materials:</strong> 
+                           <% product.materials.forEach(function(material, index) { %>
+                              <%= material.material %><%= material.percentage ? ` (${material.percentage}%)` : '' %><%= index < product.materials.length - 1 ? ', ' : '' %>
+                           <% }); %>
+                        </div>
+                        <% } %>
+                        <% if(product.style) { %>
+                        <div class="col-md-6 mb-2">
+                           <strong>Style:</strong> <%= product.style %>
+                        </div>
+                        <% } %>
+                        <% if(product.gender) { %>
+                        <div class="col-md-6 mb-2">
+                           <strong>Gender:</strong> <%= product.gender %>
+                        </div>
+                        <% } %>
+                        <% if(product.season) { %>
+                        <div class="col-md-6 mb-2">
+                           <strong>Season:</strong> <%= product.season %>
+                        </div>
+                        <% } %>
+                        <% if(product.seasons && product.seasons.length > 0) { %>
+                        <div class="col-md-6 mb-2">
+                           <strong>Seasons:</strong> <%= product.seasons.join(', ') %>
+                        </div>
+                        <% } %>
+                     </div>
+                  </div>
+
+                  <!-- Shopee-like variant selectors -->
+                  <div class="variant-group">
+                     <label class="variant-label">Color</label>
+                     <div id="color-options" class="variant-chips"></div>
+                  </div>
+                  <div class="variant-group">
+                     <label class="variant-label">Size</label>
+                     <div id="size-options" class="variant-chips"></div>
+                  </div>
+
                   <div class="d-flex flex-container">
-                     <form id="quantity-form" style="display:inline-block;" action="/add_cart/<%= product._id%>" method="POST" ></form>
+                     <form id="quantity-form" style="display:inline-block;" action="/add_cart/<%= product._id%>" method="POST" >
+                        <input type="hidden" name="selected_color" id="selected_color" value="">
+                        <input type="hidden" name="selected_size" id="selected_size" value="">
+                     </form>
                      <div>
                         <button class="btn btn-light" style="border: 1px solid #e0dede; border-radius: 0px;"
                            onclick="addMoreCart(-1)">-</button>
@@ -120,8 +211,8 @@
                         <button class="btn btn-light" style="border: 1px solid #e0dede; border-radius: 0px;"
                            onclick="addMoreCart(1)">+</button>
                      </div>
-                     <div>
-                        <p style="margin: 8px 0px 10px 10px;"><strong>Number</strong>: <% if(product.quantity > 0) { %> <%= product.quantity%> products <% }else { %><label style="color: red; font-weight: 500;">Out of stock</label><%}%></p>
+                      <div>
+                         <p id="variant-stock" style="margin: 8px 0px 10px 10px;"></p>
                     </div>
                   </div>
                   <button class="btn btn-success btnAdd" 
@@ -221,9 +312,93 @@
 </body>
 
 <script type="text/javascript">
+   // Build Shopee-like variant selectors for color and size
+   const ALL_COLORS = ['Black','White','Red','Blue','Green','Yellow','Pink','Purple','Orange','Brown','Gray','Navy','Beige','Cream','Multi-color','Other'];
+   const ALL_SIZES = ['XS','S','M','L','XL','XXL','XXXL','One Size','Custom'];
+   const defaultColor = '<%= (product.color || '').replace(/'/g, "\'") %>';
+   const defaultSize = '<%= (product.size || '').replace(/'/g, "\'") %>';
+   const VARIANTS = JSON.parse('<%- JSON.stringify(product.variants || []) %>');
+
+   function renderChips(containerId, values, current, onSelect) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      values.forEach(val => {
+         const chip = document.createElement('div');
+         chip.className = 'variant-chip' + (val === current && current ? ' selected' : '');
+         chip.textContent = val;
+         chip.addEventListener('click', () => {
+            // toggle selected in group
+            [...container.children].forEach(c => c.classList.remove('selected'));
+            chip.classList.add('selected');
+            onSelect(val);
+         });
+         container.appendChild(chip);
+      });
+   }
+
+   function setSelectedHidden(color, size) {
+      if (typeof color === 'string') document.getElementById('selected_color').value = color;
+      if (typeof size === 'string') document.getElementById('selected_size').value = size;
+      updateVariantStock();
+   }
+
+   // If variants exist, filter options based on actual availability
+   function computeAvailableColors() {
+      if (!Array.isArray(VARIANTS) || VARIANTS.length === 0) return ALL_COLORS;
+      const set = new Set();
+      VARIANTS.filter(v => (v.quantity || 0) > 0).forEach(v => set.add(v.color));
+      return Array.from(set);
+   }
+   function computeAvailableSizes(selectedColorVal) {
+      if (!Array.isArray(VARIANTS) || VARIANTS.length === 0) return ALL_SIZES;
+      const set = new Set();
+      VARIANTS.filter(v => (v.quantity || 0) > 0 && (!selectedColorVal || v.color === selectedColorVal)).forEach(v => set.add(v.size));
+      return Array.from(set);
+   }
+
+   function initVariantSelectors() {
+      const availableColors = computeAvailableColors();
+      const initialColor = availableColors.includes(defaultColor) ? defaultColor : (availableColors[0] || '');
+      renderChips('color-options', availableColors, initialColor, (val) => {
+         setSelectedHidden(val, undefined);
+         const sizes = computeAvailableSizes(val);
+         const currentSize = document.getElementById('selected_size').value;
+         const initialSize = sizes.includes(currentSize) ? currentSize : (sizes[0] || '');
+         renderChips('size-options', sizes.length ? sizes : ALL_SIZES, initialSize, (sv) => setSelectedHidden(undefined, sv));
+         setSelectedHidden(undefined, initialSize);
+      });
+      const availableSizes = computeAvailableSizes(initialColor);
+      const initialSize = availableSizes.includes(defaultSize) ? defaultSize : (availableSizes[0] || '');
+      renderChips('size-options', availableSizes.length ? availableSizes : ALL_SIZES, initialSize, (sv) => setSelectedHidden(undefined, sv));
+      setSelectedHidden(initialColor || '', initialSize || '');
+   }
+
+   initVariantSelectors();
+
+   function updateVariantStock() {
+      const stockEl = document.getElementById('variant-stock');
+      if (!stockEl) return;
+      const s = document.getElementById('selected_size').value;
+      const c = document.getElementById('selected_color').value;
+      if (Array.isArray(VARIANTS) && VARIANTS.length) {
+         const v = VARIANTS.find(v => (v.size || '') === s && (v.color || '') === c);
+         if (v && (v.quantity || 0) > 0) {
+            stockEl.innerHTML = `<strong>Number</strong>: ${v.quantity} products`;
+         } else {
+            stockEl.innerHTML = '<label style="color: red; font-weight: 500;">Out of stock</label>';
+         }
+      } else {
+         const total = <%= product.quantity %>;
+         stockEl.innerHTML = (total > 0) ? `<strong>Number</strong>: ${total} products` : '<label style="color: red; font-weight: 500;">Out of stock</label>';
+      }
+   }
+   updateVariantStock();
+
    function addToCart() {
       event.preventDefault();
       var quantity = document.querySelector('[name=quantity]').value;
+      var selectedColor = document.getElementById('selected_color').value;
+      var selectedSize = document.getElementById('selected_size').value;
       var productId = '<%= product._id %>'; // Thay thế với ID sản phẩm thực tế
       // Gửi dữ liệu đến server bằng AJAX
       var xhr = new XMLHttpRequest();
@@ -244,7 +419,8 @@
             });
          }
       };
-      xhr.send("quantity=" + quantity);
+      const body = `quantity=${encodeURIComponent(quantity)}&selected_color=${encodeURIComponent(selectedColor)}&selected_size=${encodeURIComponent(selectedSize)}`;
+      xhr.send(body);
    }
 
    function addMoreCart(delta) {
