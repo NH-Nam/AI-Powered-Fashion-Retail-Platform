@@ -1,7 +1,7 @@
 <nav class="sidebar sidebar-offcanvas" id="sidebar">
     <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
-    <a class="sidebar-brand brand-logo" href="/redirect"><img src="../../themes/frontend/images/logoAdmin.gif" alt="logo" /></a>
-      <a class="sidebar-brand brand-logo-mini" href="/redirect"><img src="../../themes/frontend/images/logoAdmin.gif" alt="logo" /></a>
+    <a class="sidebar-brand brand-logo" href="/admin"><img src="../../themes/frontend/images/logoAdmin.gif" alt="logo" /></a>
+      <a class="sidebar-brand brand-logo-mini" href="/admin"><img src="../../themes/frontend/images/logoAdmin.gif" alt="logo" /></a>
     </div>
     <ul class="nav">
       <li class="nav-item profile">
@@ -56,15 +56,15 @@
       <li class="nav-item nav-category">
         <span class="nav-link">Navigation</span>
       </li>
-      <li class="nav-item menu-items">
-        <a class="nav-link" href="/redirect">
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='redirect') ? 'active' : '' %>" data-path="redirect">
+        <a class="nav-link" href="/admin">
           <span class="menu-icon">
             <i class="mdi mdi-speedometer"></i>
           </span>
           <span class="menu-title">Dashboard</span>
         </a>
       </li>
-      <li class="nav-item menu-items">
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='category') ? 'active' : '' %>" data-path="category">
         <a class="nav-link" href="/category">
           <span class="menu-icon">
             <i class="mdi mdi-playlist-play"></i>
@@ -72,22 +72,22 @@
           <span class="menu-title">Category</span>
         </a>
       </li>
-      <li class="nav-item menu-items">
-        <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='product') ? 'active' : '' %>" data-path="product">
+        <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="<%= (typeof path!=='undefined' && path==='product') ? 'true' : 'false' %>" aria-controls="ui-basic">
           <span class="menu-icon">
             <i class="mdi mdi-laptop"></i>
           </span>
           <span class="menu-title">Products</span>
           <i class="menu-arrow"></i>
         </a>
-        <div class="collapse" id="ui-basic">
+        <div class="collapse<%= (typeof path!=='undefined' && path==='product') ? ' show' : '' %>" id="ui-basic">
           <ul class="nav flex-column sub-menu">
             <li class="nav-item"> <a class="nav-link" href="/product/add">Add Product</a></li>
             <li class="nav-item"> <a class="nav-link" href="/product">Show Product</a></li>
           </ul>
         </div>
       </li>
-      <li class="nav-item menu-items">
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='order') ? 'active' : '' %>" data-path="order">
         <a class="nav-link" href="/order">
           <span class="menu-icon">
             <i class="mdi mdi-table-large"></i>
@@ -95,7 +95,7 @@
           <span class="menu-title">Orders</span>
         </a>
       </li>
-      <li class="nav-item menu-items">
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='feedback') ? 'active' : '' %>" data-path="feedback">
         <a class="nav-link" href="/feedback">
           <span class="menu-icon">
             <i class="mdi mdi-contacts"></i>
@@ -103,7 +103,15 @@
           <span class="menu-title">Feedback</span>
         </a>
       </li>
-      <li class="nav-item menu-items">
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='warehouses') ? 'active' : '' %>" data-path="warehouses">
+        <a class="nav-link" href="/warehouses/admin">
+          <span class="menu-icon">
+            <i class="mdi mdi-warehouse"></i>
+          </span>
+          <span class="menu-title">Warehouses</span>
+        </a>
+      </li>
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='user') ? 'active' : '' %>" data-path="user">
         <a class="nav-link" href="/user">
           <span class="menu-icon">
             <i class="mdi mdi-security"></i>
@@ -112,4 +120,18 @@
         </a>
       </li>
     </ul>
+    <style>
+      /* Ensure only li.active controls the highlight */
+      #sidebar .menu-items .nav-link.active { background: transparent !important; }
+      #sidebar .menu-items.active > .nav-link { background: rgba(255,255,255,0.06); }
+      /* Remove focus highlight that may persist from previous page */
+      #sidebar .menu-items > .nav-link:focus { background: transparent !important; outline: none !important; box-shadow: none !important; }
+      #sidebar .menu-items > .nav-link:focus::before { opacity: 0 !important; }
+    </style>
+    <script>
+      // On load, if a sidebar item kept keyboard focus, blur it to avoid dual highlight
+      (function(){
+        try { if (document.activeElement && document.activeElement.closest && document.activeElement.closest('#sidebar')) { document.activeElement.blur(); } } catch(e) {}
+      })();
+    </script>
   </nav>

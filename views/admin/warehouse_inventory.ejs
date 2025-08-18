@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('css') %>
+  <% path='redirect' %>
+  <title>Warehouse Inventory</title>
+  <style>
+    /* Make variants table text white and style dropdowns for dark theme */
+    .inventory-variants table, .inventory-variants th, .inventory-variants td { color: #fff; }
+    #sizeSelect, #colorSelect { color: #fff; background-color: #1f2532; }
+    #sizeSelect option, #colorSelect option { color: #fff; background-color: #1f2532; }
+    #setInput, #deltaInput { color: #fff; background-color: #1f2532; }
+    #setInput::placeholder, #deltaInput::placeholder { color: #9aa4b2; }
+  </style>
+</head>
+<body>
+  <div class="container-scroller">
+    <%- include('siderbar') %>
+    <%- include('header') %>
+    <div class="main-panel">
+      <div class="content-wrapper">
+        <h4 class="card-title">Inventory - <%= warehouse ? warehouse.name : '' %> (<%= warehouse ? warehouse.code : '' %>)</h4>
+        <% if (message) { %>
+          <div class="alert alert-<%= message.type %>"><%= message.content %></div>
+        <% } %>
+        <div class="row">
+          <div class="col-md-5 grid-margin stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="mb-3">Adjust Inventory</h5>
+                <form method="post" action="/warehouses/admin/<%= warehouse._id %>/adjust">
+                  <div class="form-group">
+                    <label>Product</label>
+                    <div class="d-flex">
+                      <button type="button" id="chooseProductBtn" class="btn btn-outline-info">Choose Product</button>
+                      <input type="hidden" name="product_id" id="chosenProductId" required>
+                      <div id="chosenProductSummary" style="margin-left:12px; align-self:center; opacity:0.9;"></div>
+                    </div>
+                  </div>
+                  <div id="productInfoPanel" style="margin:10px 0 6px 0;"></div>
+                  <div id="variantsPanel" style="margin:0 0 10px 0;"></div>
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                      <label>Size</label>
+                      <select id="sizeSelect" name="size" class="form-control">
+                        <option value="">-- Select size --</option>
+                      </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label>Color</label>
+                      <select id="colorSelect" name="color" class="form-control">
+                        <option value="">-- Select color --</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-row">
+                    <div class="form-group col-md-6">
+                      <label>Set Quantity</label>
+                      <input type="number" id="setInput" name="set" class="form-control" placeholder="Exact quantity" min="0">
+                    </div>
+                    <div class="form-group col-md-6">
+                      <label>Or Delta (+/-)</label>
+                      <input type="number" id="deltaInput" name="delta" class="form-control" placeholder="e.g., 5 or -3">
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Update</button>
+                  <a href="/warehouses/admin" class="btn btn-light">Back</a>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-7 grid-margin stretch-card">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="mb-3">Current Items</h5>
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th>Size</th>
+                        <th>Color</th>
+                        <th>Quantity</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% items.forEach(function(it){ %>
+                        <tr>
+                          <td>
+                            <% if (it.product_id) { %>
+                              <a href="/product/edit/<%= it.product_id._id %>"><%= it.product_id.title %></a>
+                            <% } else { %>
+                              <em>Unknown</em>
+                            <% } %>
+                          </td>
+                          <td><%= it.size || '-' %></td>
+                          <td><%= it.color || '-' %></td>
+                          <td><%= it.quantity %></td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <div class="d-sm-flex justify-content-center justify-content-sm-between">
+          <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">© 2023 All Rights Reserved By longtech</span>
+        </div>
+      </footer>
+    </div>
+    <%- include('script') %>
+    <script>
+      // Modal UI
+      (function(){
+        const products = <%- JSON.stringify(products || []) %>;
+        const btn = document.getElementById('chooseProductBtn');
+        const hiddenId = document.getElementById('chosenProductId');
+        const summary = document.getElementById('chosenProductSummary');
+        const productInfoPanel = document.getElementById('productInfoPanel');
+        const variantsPanel = document.getElementById('variantsPanel');
+        const sizeSelect = document.getElementById('sizeSelect');
+        const colorSelect = document.getElementById('colorSelect');
+
+        function renderModal(){
+          const overlay = document.createElement('div');
+          overlay.style.position = 'fixed';
+          overlay.style.inset = '0';
+          overlay.style.background = 'rgba(0,0,0,0.55)';
+          overlay.style.zIndex = '9999';
+
+          const modal = document.createElement('div');
+          modal.style.position = 'absolute';
+          modal.style.top = '50%';
+          modal.style.left = '50%';
+          modal.style.transform = 'translate(-50%, -50%)';
+          modal.style.width = '820px';
+          modal.style.maxWidth = '95vw';
+          modal.style.maxHeight = '85vh';
+          modal.style.overflow = 'auto';
+          modal.style.background = '#1f2532';
+          modal.style.borderRadius = '8px';
+          modal.style.boxShadow = '0 12px 40px rgba(0,0,0,.4)';
+          modal.style.color = '#fff';
+
+          modal.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08)">
+              <strong>Choose Product</strong>
+              <button id="closeModal" class="btn btn-sm btn-light">Close</button>
+            </div>
+            <div style="padding:12px 16px">
+              <input id="productSearch" class="form-control" placeholder="Search products by title..." />
+              <div id="productList" style="margin-top:10px"></div>
+            </div>
+          `;
+
+          overlay.appendChild(modal);
+          document.body.appendChild(overlay);
+
+          function renderList(filter){
+            const list = document.getElementById('productList');
+            const q = (filter||'').toLowerCase();
+            const filtered = products.filter(p => !q || (p.title||'').toLowerCase().includes(q));
+            list.innerHTML = filtered.map(p => {
+              const price = Number(p.discount_price)>0 && Number(p.discount_price)<Number(p.price)
+                ? `${(p.discount_price||0).toLocaleString()}đ <span style='text-decoration:line-through;opacity:.7'>${(p.price||0).toLocaleString()}đ</span>`
+                : `${(p.price||0).toLocaleString()}đ`;
+              const materials = (p.materials||[]).map(m => `${m.material}${m.percentage?` (${m.percentage}%)`:''}`).join(', ');
+              const sizes = (p.variants||[]).map(v => v.size).filter(Boolean);
+              const colors = (p.variants||[]).map(v => v.color).filter(Boolean);
+              return `
+                <div class="card" style="margin-bottom:8px;">
+                  <div class="card-body" style="display:flex;gap:12px;align-items:center;">
+                    <img src="${p.image||''}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:6px;background:#333"/>
+                    <div style="flex:1">
+                      <div style="font-weight:600">${p.title}</div>
+                      <div style="font-size:12px;opacity:.9">Brand: ${p.brand||'-'} | Price: ${price} | Stock: ${p.quantity||0}</div>
+                      <div style="font-size:12px;opacity:.9">Materials: ${materials||'-'}</div>
+                      <div style="font-size:12px;opacity:.9">Sizes: ${sizes.join('/')||'-'} | Colors: ${colors.join('/')||'-'}</div>
+                    </div>
+                    <button data-id="${p._id}" data-title="${p.title.replace(/"/g,'&quot;')}" class="btn btn-primary btn-sm pickProduct">Choose</button>
+                  </div>
+                </div>`;
+            }).join('');
+            list.querySelectorAll('.pickProduct').forEach(btn => {
+              btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                const title = btn.getAttribute('data-title');
+                const selected = products.find(p => String(p._id) === String(id));
+                hiddenId.value = id;
+                summary.innerHTML = `<span class="badge badge-success">Selected</span> <a href="/product/edit/${id}" target="_blank">${title}</a>`;
+
+                // Populate info panel and datalists
+                try {
+                  const priceLine = (Number(selected.discount_price)>0 && Number(selected.discount_price)<Number(selected.price))
+                    ? `${(selected.discount_price||0).toLocaleString()}đ <span style='text-decoration:line-through;opacity:.7'>${(selected.price||0).toLocaleString()}đ</span>`
+                    : `${(selected.price||0).toLocaleString()}đ`;
+                  const materials = (selected.materials||[]).map(m => `${m.material}${m.percentage?` (${m.percentage}%)`:''}`).join(', ');
+                  const sizes = Array.from(new Set((selected.variants||[]).map(v => v.size).filter(Boolean)));
+                  const colors = Array.from(new Set((selected.variants||[]).map(v => v.color).filter(Boolean)));
+                  productInfoPanel.innerHTML = `
+                    <div class="card" style="margin-bottom:8px;background:#151a22;border-color:rgba(255,255,255,.08)">
+                      <div class="card-body" style="display:flex;gap:12px;align-items:center;">
+                        <img src="${selected.image||''}" style="width:56px;height:56px;object-fit:cover;border-radius:6px;background:#333"/>
+                        <div style="flex:1">
+                          <div style="font-weight:600">${selected.title}</div>
+                          <div style="font-size:12px;opacity:.9">Brand: ${selected.brand||'-'} | Price: ${priceLine} | Stock: ${selected.quantity||0}</div>
+                          <div style="font-size:12px;opacity:.9">Materials: ${materials||'-'}</div>
+                          <div style="font-size:12px;opacity:.9">Sizes: ${sizes.join('/')||'-'} | Colors: ${colors.join('/')||'-'}</div>
+                        </div>
+                      </div>
+                    </div>`;
+
+                  // Render variants table
+                  const rows = (selected.variants||[]).map(v => `
+                    <tr>
+                      <td>${v.size || '-'}</td>
+                      <td>${v.color || '-'}</td>
+                      <td>${v.quantity || 0}</td>
+                    </tr>`).join('');
+                  variantsPanel.innerHTML = selected.variants && selected.variants.length ? `
+                    <div class="table-responsive inventory-variants">
+                      <table class="table table-sm">
+                        <thead><tr><th>Size</th><th>Color</th><th>Qty</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                      </table>
+                    </div>` : '';
+
+                  // Populate dropdowns
+                  sizeSelect.innerHTML = '<option value="">-- Select size --</option>' + sizes.map(s => `<option value="${s}">${s}</option>`).join('');
+                  colorSelect.innerHTML = '<option value="">-- Select color --</option>' + colors.map(c => `<option value="${c}">${c}</option>`).join('');
+
+                  // Limit colors to those available for chosen size
+                  const variants = Array.isArray(selected.variants) ? selected.variants : [];
+                  function refreshColorsForSize(){
+                    const s = sizeSelect.value;
+                    const availColors = Array.from(new Set(variants.filter(v => !s || v.size === s).map(v => v.color).filter(Boolean)));
+                    const current = colorSelect.value;
+                    colorSelect.innerHTML = '<option value="">-- Select color --</option>' + availColors.map(c => `<option value="${c}">${c}</option>`).join('');
+                    if (availColors.includes(current)) colorSelect.value = current; else colorSelect.value = '';
+                  }
+                  sizeSelect.onchange = refreshColorsForSize;
+                  // Quantity helpers: clear delta when set changes and vice versa
+                  const setInput = document.getElementById('setInput');
+                  const deltaInput = document.getElementById('deltaInput');
+                  if (setInput && deltaInput) {
+                    setInput.addEventListener('input', () => { if (setInput.value !== '') deltaInput.value = ''; });
+                    deltaInput.addEventListener('input', () => { if (deltaInput.value !== '') setInput.value = ''; });
+                  }
+                  // If product has single size/color, preselect
+                  if (sizes.length === 1) sizeSelect.value = sizes[0];
+                  refreshColorsForSize();
+                  if (colors.length === 1) colorSelect.value = colors[0];
+                } catch{}
+                overlay.remove();
+              });
+            });
+          }
+
+          renderList('');
+          const search = modal.querySelector('#productSearch');
+          search.addEventListener('input', () => renderList(search.value));
+          modal.querySelector('#closeModal').addEventListener('click', () => overlay.remove());
+          overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+        }
+
+        btn.addEventListener('click', renderModal);
+      })();
+    </script>
+  </div>
+</body>
+</html>
+
+

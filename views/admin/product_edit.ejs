@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('css') %>
+    <% path='product'%>
+    <style>
+        select.form-control { color: white !important; }
+        select.form-control option { color: white; }
+        select.form-control:focus { color: white !important; }
+        select.form-control option[value=""] { color: #888; }
+        input.form-control { color: white !important; }
+        input.form-control:focus { color: white !important; }
+        input.form-control::placeholder { color: #888; }
+        textarea.form-control { color: white !important; }
+        textarea.form-control:focus { color: white !important; }
+        .season-control { width: 100%; display: block; padding: 8px 12px; border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; }
+        .season-control .form-check { margin-bottom: 8px; }
+        .season-control .form-check:last-child { margin-bottom: 0; }
+        .season-control label { color: white; margin-left: 6px; }
+        /* Variant editor */
+        .variant-row { border: 1px dashed rgba(255,255,255,0.2); padding: 8px; border-radius: 4px; margin-bottom: 8px; }
+        .variant-row .form-control { min-height: 38px; }
+    </style>
+</head>
+<body>
+<div class="container-scroller">
+    <%- include('siderbar') %>
+    <%- include('header') %>
+    <div class="main-panel">
+        <div class="content-wrapper">
+            <div class="div_center"><h1>Update Product</h1></div>
+            <% if (message) { %>
+                <div class="alert alert-<%= message.type %>">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+                    <%= message.content %>
+                </div>
+            <% } %>
+            <form action="/product/edit/<%= product._id %>" method="post" id="EditForm">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label>Title: </label>
+                            <input type="text" name="title" class="form-control" required value="<%= product.title %>">
+                        </div>
+                        <div class="form-group mb-3">
+                            <textarea name="description" id="description" class="form-control" rows="10"><%= product.description %></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Brand: </label>
+                                    <input type="text" name="brand" class="form-control" value="<%= product.brand || '' %>" placeholder="Enter brand name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Style: </label>
+                                    <select class="form-control" name="style">
+                                        <option value="">-- Select Style --</option>
+                                        <option value="Casual" <%= product.style === 'Casual' ? 'selected' : '' %>>Casual</option>
+                                        <option value="Formal" <%= product.style === 'Formal' ? 'selected' : '' %>>Formal</option>
+                                        <option value="Sport" <%= product.style === 'Sport' ? 'selected' : '' %>>Sport</option>
+                                        <option value="Vintage" <%= product.style === 'Vintage' ? 'selected' : '' %>>Vintage</option>
+                                        <option value="Modern" <%= product.style === 'Modern' ? 'selected' : '' %>>Modern</option>
+                                        <option value="Classic" <%= product.style === 'Classic' ? 'selected' : '' %>>Classic</option>
+                                        <option value="Trendy" <%= product.style === 'Trendy' ? 'selected' : '' %>>Trendy</option>
+                                        <option value="Bohemian" <%= product.style === 'Bohemian' ? 'selected' : '' %>>Bohemian</option>
+                                        <option value="Minimalist" <%= product.style === 'Minimalist' ? 'selected' : '' %>>Minimalist</option>
+                                        <option value="Other" <%= product.style === 'Other' ? 'selected' : '' %>>Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Seasons: </label>
+                                    <div class="season-control">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="seasons" value="Spring" id="season-spring"
+                                                <%= (product.seasons && product.seasons.includes('Spring')) || product.season === 'Spring' ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="season-spring">Spring</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="seasons" value="Summer" id="season-summer"
+                                                <%= (product.seasons && product.seasons.includes('Summer')) || product.season === 'Summer' ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="season-summer">Summer</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="seasons" value="Fall" id="season-fall"
+                                                <%= (product.seasons && product.seasons.includes('Fall')) || product.season === 'Fall' ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="season-fall">Fall</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="seasons" value="Winter" id="season-winter"
+                                                <%= (product.seasons && product.seasons.includes('Winter')) || product.season === 'Winter' ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="season-winter">Winter</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="seasons" value="All Season" id="season-all"
+                                                <%= (product.seasons && product.seasons.includes('All Season')) || product.season === 'All Season' ? 'checked' : '' %>>
+                                            <label class="form-check-label" for="season-all">All Season</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 30px">
+                            <button class="btn btn-success">Save</button>
+                            <a href="/product">Back to list</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Image: </label>
+                            <button type="button" class="btn btn-warning" onclick="$('#upload_file').click()" style="margin-top: -10px;">Upload photos</button>
+                            <input type="file" id="upload_file" hidden>
+                            <input type="url" name="image" id="image_url" class="form-control" required value="<%= product.image %>">
+                            <img src="" style="max-height: 220px;" id="image_img">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Price: </label>
+                                    <input required type="number" name="price" class="form-control" value="<%= product.price %>">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Discount: </label>
+                                    <input type="number" name="discount_price" class="form-control" value="<%= product.discount_price %>">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Buy Price (cost): </label>
+                                    <input type="number" name="buy_price" class="form-control" value="<%= product.buy_price || 0 %>">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Gender: </label>
+                                    <select class="form-control" required name="category">
+                                        <option value="">-- Select Gender --</option>
+                                        <% var selectedCategoryId = (product.category && (product.category._id || product.category)) || '';
+                                           for (let category of categories) { if ((category.name||'').toLowerCase() === 'kids') { continue; } %>
+                                            <option value="<%= category._id %>" <%= String(selectedCategoryId) === String(category._id) ? 'selected' : '' %>><%= category.name %></option>
+                                        <% } %>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Top-level Size/Color removed in favor of Variants editor -->
+                        <!-- Variants (Size-Color-Quantity) -->
+                        <div class="form-group">
+                            <label>Variants (Size - Color - Quantity): </label>
+                            <div id="variants-container"></div>
+                            <button type="button" class="btn btn-sm btn-info" onclick="addVariant()">+ Add Variant</button>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Materials: </label>
+                            <div id="materials-container"></div>
+                            <button type="button" class="btn btn-sm btn-info" onclick="addMaterial()">+ Add Material</button>
+                        </div>
+                        <!-- Removed per request: Product Notes, Tags, Weight, SKU -->
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <%- include('script') %>
+    <script>
+        $(function () {
+            CKEDITOR.replace('description');
+            $('[name=image]').change(function () { $('#image_img').attr('src', $(this).val()) })
+            $('#upload_file').change(function (e) { uploadFile(e, 'image_url'); });
+            loadExistingMaterials();
+            loadExistingVariants();
+        });
+
+        // Use materials if present; otherwise synthesize from legacy single material
+        const initialMaterials = JSON.parse('<%- JSON.stringify((product.materials && product.materials.length ? product.materials : (product.material ? [{material: product.material, percentage: 100}] : []))) %>');
+        const initialVariants = JSON.parse('<%- JSON.stringify((product.variants && product.variants.length ? product.variants : [{ size: (product.size || ""), color: (product.color || ""), quantity: (product.quantity || 0) }])) %>');
+
+        function loadExistingMaterials() {
+            if (Array.isArray(initialMaterials)) {
+                initialMaterials.forEach(function(m){ addMaterial(m.material, m.percentage || 100); });
+            }
+        }
+        function addMaterial(selectedMaterial = '', percentage = 100) {
+            const container = document.getElementById('materials-container');
+            const materialId = Date.now();
+            const html = `
+                <div class="material-row mb-2" id="material-${materialId}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <select class="form-control" name="materials[${materialId}][material]">
+                                <option value="">-- Select Material --</option>
+                                <option value="Cotton" ${selectedMaterial === 'Cotton' ? 'selected' : ''}>Bông (Cotton)</option>
+                                <option value="Polyester" ${selectedMaterial === 'Polyester' ? 'selected' : ''}>Polyester</option>
+                                <option value="Wool" ${selectedMaterial === 'Wool' ? 'selected' : ''}>Len (Wool)</option>
+                                <option value="Silk" ${selectedMaterial === 'Silk' ? 'selected' : ''}>Lụa (Silk)</option>
+                                <option value="Linen" ${selectedMaterial === 'Linen' ? 'selected' : ''}>Vải lanh (Linen)</option>
+                                <option value="Denim" ${selectedMaterial === 'Denim' ? 'selected' : ''}>Vải bò (Denim)</option>
+                                <option value="Leather" ${selectedMaterial === 'Leather' ? 'selected' : ''}>Da (Leather)</option>
+                                <option value="Suede" ${selectedMaterial === 'Suede' ? 'selected' : ''}>Da lộn (Suede)</option>
+                                <option value="Synthetic" ${selectedMaterial === 'Synthetic' ? 'selected' : ''}>Sợi tổng hợp (Synthetic)</option>
+                                <option value="Blend" ${selectedMaterial === 'Blend' ? 'selected' : ''}>Hỗn hợp (Blend)</option>
+                                <option value="Rayon" ${selectedMaterial === 'Rayon' ? 'selected' : ''}>Rayon</option>
+                                <option value="Nylon" ${selectedMaterial === 'Nylon' ? 'selected' : ''}>Nylon</option>
+                                <option value="Spandex" ${selectedMaterial === 'Spandex' ? 'selected' : ''}>Spandex</option>
+                                <option value="Acrylic" ${selectedMaterial === 'Acrylic' ? 'selected' : ''}>Acrylic</option>
+                                <option value="Other" ${selectedMaterial === 'Other' ? 'selected' : ''}>Khác (Other)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="number" class="form-control" name="materials[${materialId}][percentage]" placeholder="%" min="0" max="100" value="${percentage}">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-sm btn-danger" onclick="removeMaterial(${materialId})">Remove</button>
+                        </div>
+                    </div>
+                </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+        function removeMaterial(materialId) { const n = document.getElementById(`material-${materialId}`); if (n) n.remove(); }
+        // ===== Variants editor =====
+        function loadExistingVariants() {
+            if (Array.isArray(initialVariants) && initialVariants.length > 0) {
+                initialVariants.forEach(function(v){ addVariant(v.size || '', v.color || '', v.quantity || 0); });
+            }
+        }
+        function addVariant(size = '', color = '', quantity = 0) {
+            const container = document.getElementById('variants-container');
+            const rowId = 'v' + Date.now() + Math.floor(Math.random()*1000);
+            const html = `
+                <div class="variant-row" id="${rowId}">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <select class="form-control" name="variants[${rowId}][size]">
+                                <option value="">-- Select Size --</option>
+                                ${['XS','S','M','L','XL','XXL','XXXL','One Size','Custom'].map(opt => `<option value="${opt}" ${size===opt?'selected':''}>${opt}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <select class="form-control" name="variants[${rowId}][color]">
+                                <option value="">-- Select Color --</option>
+                                ${['Black','White','Red','Blue','Green','Yellow','Pink','Purple','Orange','Brown','Gray','Navy','Beige','Cream','Multi-color','Other'].map(opt => `<option value="${opt}" ${color===opt?'selected':''}>${opt}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <input type="number" class="form-control" name="variants[${rowId}][quantity]" min="0" value="${quantity}">
+                        </div>
+                        <div class="col-md-1 mb-2 d-flex align-items-center">
+                            <button type="button" class="btn btn-sm btn-danger" onclick="removeVariant('${rowId}')">X</button>
+                        </div>
+                    </div>
+                </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+        function removeVariant(rowId) { const n = document.getElementById(rowId); if (n) n.remove(); }
+        function uploadFile(e, target_id) {
+            var file = e.target.files[0];
+            if (!file.name.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i)) { alert('The image you uploaded is not in the correct file format)'); return; }
+            var url = '//' + window.location.host + '/api/upload';
+            var xhr = new XMLHttpRequest(); var fd = new FormData();
+            xhr.open('POST', url, true); xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var obj = JSON.parse(xhr.responseText);
+                    if (obj.status === 'error') { alert(obj.message); return; }
+                    document.getElementById(target_id).value = obj.url; $('#image_img').attr('src', obj.url);
+                } else if (xhr.readyState == 4 && xhr.status !== 200) { alert('An error occurred during upload.'); }
+            };
+            fd.append('file', file); xhr.send(fd);
+        }
+    </script>
+</div>
+</body>
+</html>

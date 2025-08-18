@@ -2,6 +2,15 @@ const mongoose = require('mongoose'); // Erase if already required
 
 // Declare the Schema of the Mongo model
 var OrderSchema = new mongoose.Schema({
+    // Public-facing randomized order code for users
+    order_code: {
+        type: String,
+        default: function generateOrderCode() {
+            const timePart = Date.now().toString(36).toUpperCase();
+            const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+            return `ORD-${timePart}-${randomPart}`;
+        }
+    },
     user_id:{
         type:mongoose.Schema.Types.ObjectId,
         ref: 'users'
