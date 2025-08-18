@@ -27,23 +27,25 @@
             <% } %>
           </div>
           <div class="col-md-12 table-responsive">
-            <table class="table mb-0 align-middle text-nowrap table-bordered border">
+            <table class="table mb-0 align-middle text-nowrap table-bordered border" style="font-size: 14px;">
                 <thead>
                     <tr>
-                        <th class="border-top-0">No</th>
-                        <th class="border-top-0">Full Name</th>
-                        <th class="border-top-0">Email</th>
-                        <th class="border-top-0">Address</th>
-                        <th class="border-top-0">Phone</th>
-                        <th class="border-top-0">Payment status</th>
-                        <th class="border-top-0">Delivery status</th>
-                        <th class="border-top-0" style="width: 100px">Action</th>
+                        <th class="border-top-0" style="width: 50px">No</th>
+                        <th class="border-top-0" style="width: 120px">Order ID</th>
+                        <th class="border-top-0" style="width: 120px">Full Name</th>
+                        <th class="border-top-0" style="width: 180px">Email</th>
+                        <th class="border-top-0" style="width: 100px">Address</th>
+                        <th class="border-top-0" style="width: 100px">Phone</th>
+                        <th class="border-top-0" style="width: 100px">Payment status</th>
+                        <th class="border-top-0" style="width: 100px">Delivery status</th>
+                        <th class="border-top-0" style="width: 120px">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     <%var index =1; for(let order of orders){%>
                         <tr>
                             <td><%= index++%></td>
+                            <td style="font-family: monospace; font-size: 12px;"><%= order.order_code || order._id%></td>
                             <td><%= order.name%></td>
                             <td><%= order.email%></td>
                             <td><%= order.address%></td>
@@ -52,21 +54,22 @@
                         <% if(order.delivery_status == 'processing'){ %>
                             <td><%= order.delivery_status%></td>
                             <td>
-                                <a href="/order/delivered/<%= order._id%>" onclick="return confirm('Are you sure this order is delivered')"><button class="btn btn-primary">Delivery</button></a>
-                                <a href="/order/detail/<%= order._id%>"><button class="btn btn-info">Details</button></a>
-                                <a href="/order/print_pdf/<%= order._id%>" class="btn btn-secondary"><i class="bi bi-download"></i></a>
+                                <a href="/order/delivered/<%= order._id%>" onclick="return confirm('Mark this order as delivered?')"><button class="btn btn-primary btn-sm">Delivery</button></a>
+                                <a href="/order/cancel/<%= order._id%>" onclick="return confirm('Cancel this order?')"><button class="btn btn-warning btn-sm ms-1">Cancel</button></a>
+                                <a href="/order/detail/<%= order._id%>"><button class="btn btn-info btn-sm ms-1">Details</button></a>
+                                <a href="/order/print_pdf/<%= order._id%>" class="btn btn-secondary btn-sm ms-1"><i class="bi bi-download"></i></a>
                             </td>
-                        <% }else{%>
+                        <% }else{ %>
                             <td style="color: green;"><%= order.delivery_status%></td>
                             <td>
-                                <a href="/order/detail/<%= order._id%>"><button class="btn btn-info">Details</button></a>
-                                <a href="/order/delete/<%= order._id%>" class="btn btn-danger" onclick="return  confirm('Are you sure to delete this order')">Delete</a>
-                                <a href="/order/print_pdf/<%= order._id%>" class="btn btn-secondary"><i class="bi bi-download"></i></a>
+                                <a href="/order/detail/<%= order._id%>"><button class="btn btn-info btn-sm">Details</button></a>
+                                <a href="/order/delete/<%= order._id%>" class="btn btn-danger btn-sm ms-1" onclick="return  confirm('Are you sure to delete this order')">Delete</button></a>
+                                <a href="/order/print_pdf/<%= order._id%>" class="btn btn-secondary btn-sm ms-1"><i class="bi bi-download"></i></a>
                             </td>
-                        <%}%>
+                        <% } %>
                         </tr>
-                    <%}%>
-                    <%if(totalOrder >0) {%>
+                    <% } %>
+                    <% if(totalOrder >0) { %>
                         <tr>
                             <td></td>
                             <td></td>
@@ -75,9 +78,10 @@
                             <td></td>
                             <td></td>
                             <td></td>
-                            <td><p class="text-success"><strong>Total: <%= numberFormat(totalOrder)%> VNDC</strong></label></p>
+                            <td></td>
+                            <td><p class="text-success"><strong>Total: <%= numberFormat(totalOrder)%> VNDC</strong></label></p></td>
                         </tr>
-                    <%}%>
+                    <% } %>
                 </tbody>
             </table>
             </div>
