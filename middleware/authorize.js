@@ -1,3 +1,5 @@
+// middleware/authorize.js
+
 const jwt = require('jsonwebtoken');
 require('dotenv').config(); // file env lưu mkhau bí mật thui
 
@@ -45,7 +47,6 @@ function checkNotAuthenticated(req, res, next) {
         next(error);
     }
 }
-
 
 //check quyền admin (chỉ tài khoản admin vào được)
 function admin(req, res, next) {

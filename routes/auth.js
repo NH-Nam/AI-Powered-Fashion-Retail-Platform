@@ -144,24 +144,6 @@ router.post('/login', async (req, res) => {
         // So sánh mật khẩu đã nhập với mật khẩu đã mã hóa
         const match = await bcrypt.compare(req.body.password, user.password);
         if (match) {
-            // Bypass email verification for now
-            // if (user.email_verified === true) {
-            //     // Nếu email đã được xác minh
-            //     const token = jwt.sign(
-            //         { userId: user._id, usertype: user.usertype },
-            //         process.env.JWT_SECRET,
-            //         { expiresIn: '24h' }
-            //     );
-            //     res.cookie('token', token, { httpOnly: true, sameSite: true });
-            //     res.redirect('/redirect');
-            // } else {
-            //     // Nếu email chưa được xác minh
-            //     const verificationToken = generateVerificationToken();
-            //     user.emailToken = verificationToken;
-            //     await user.save();
-            //     await sendVerificationEmail(user.email, verificationToken);
-            //     res.redirect('/verify-email');
-            // }
             // Allow login regardless of email_verified
             const token = jwt.sign(
                 { userId: user._id, usertype: user.usertype },
@@ -169,7 +151,11 @@ router.post('/login', async (req, res) => {
                 { expiresIn: '24h' }
             );
             res.cookie('token', token, { httpOnly: true, sameSite: true });
-            res.redirect('/redirect');
+            if (user.usertype === 'Admin') {
+                res.redirect('/admin');
+            } else {
+                res.redirect('/');
+            }
         } else {
             req.session.message = {
                 type: 'danger',
@@ -187,9 +173,7 @@ router.post('/login', async (req, res) => {
 })
 
 router.get('/logout', (req, res) => {
-    // Xóa cookie chứa JWT
     res.clearCookie('token');
-    // Gửi phản hồi thông báo người dùng đã đăng xuất
     res.redirect('/');
 });
 
@@ -288,5 +272,25 @@ router.post('/reset/token=:id', async (req, res) => {
 router.get('/auth/google', checkNotAuthenticated, (req, res) => {
     res.render('auth/error', { title: 'Maintance' })
 })
+
+// Redirect route for admin dashboard access
+router.get('/redirect', async (req, res) => {
+    try {
+        const token = req.cookies.token;
+        if (!token) {
+            return res.redirect('/login');
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded.usertype === 'Admin') {
+            res.redirect('/admin');
+        } else {
+            res.redirect('/');
+        }
+    } catch (error) {
+        // If token is invalid, redirect to login
+        res.redirect('/login');
+    }
+});
 
 module.exports = router;
