@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base href="/public">
+    <% token = '' %>
+    <%- include('css') %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script> <!-- Thêm Stripe.js -->
+    <style>
+        @media(max-width:350px) {
+            form input[type="submit"] {
+                padding: 15px 10px;
+            }
+        }
+
+        /* Thêm một số style cơ bản cho Stripe Elements */
+        .StripeElement {
+            background-color: white;
+            padding: 10px 12px;
+            border-radius: 4px;
+            border: 1px solid #ccd0d2;
+            box-shadow: 0 1px 3px 0 #e6ebf1;
+            -webkit-transition: box-shadow 150ms ease;
+            transition: box-shadow 150ms ease;
+        }
+        .StripeElement--focus {
+            box-shadow: 0 1px 3px 0 #cfd7df;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero_area">
+        <%- include('header') %>
+        <div class="container">
+            <h1 class="mt-4" style="text-align:center;">Payment By Credit Card</h1>
+            <div class="row">
+                <div class="col-md-6 offset-md-3">
+                    <div class="panel panel-default credit-card-box p-3">
+                        <div class="panel-heading border p-3">
+                            <h3 class="panel-title">Payment Details</h3>
+                        </div>
+                        <div class="panel-body">
+                            <% if (message) { %>
+                                <div class="alert alert-<%= message.type %>">
+                                    <button type="button" class="close" data-dismiss="alert"
+                                        aria-hidden="true">x</button>
+                                    <%= message.content %>
+                                </div>
+                            <% } %>
+                            <form role="form" action="/stripe" method="post"
+                                  class="require-validation border p-3" data-cc-on-file="false"
+                                  data-stripe-publishable-key="<%= key %>" id="payment-form">
+                                  <div class='form-group required'>
+                                    <label class='control-label'>Name on Card</label>
+                                    <input class='form-control' size='4' type='text'
+                                        placeholder='Enter Name' name="name">
+                                </div>
+                                <div class='form-group required'>
+                                    <label class='control-label'>Address</label>
+                                    <input class='form-control' size='4' type='text'
+                                        placeholder='Enter Address' name="address">
+                                </div>
+                                <label class='control-label' name="card">Number Card</label>
+                                <div id="card-element" class="form-group">
+                                    <!-- Stripe Elements sẽ được chèn vào đây -->
+                                </div>
+                               <input type="submit" class="payment" value="Pay Now <%= numberFormat(totalmoney) %> VND">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%- include('footer') %>
+
+    <<script>
+        var stripe = Stripe('<%= key %>'); // Sử dụng key từ server
+        var elements = stripe.elements();
+        var style = {
+          base: {
+            color: "#32325d",
+          }
+        };
+        
+        var card = elements.create("card", { 
+          style: style, 
+          hidePostalCode: true // Thêm dòng này để ẩn mã zip
+        });
+        card.mount("#card-element");
+        
+        var form = document.getElementById('payment-form');
+        form.addEventListener('submit', function(event) {
+          event.preventDefault();
+        
+          stripe.createToken(card).then(function(result) {
+            if (result.error) {
+              // Hiển thị lỗi
+              console.log(result.error.message);
+            } else {
+              // Gửi token đến server của bạn
+              stripeTokenHandler(result.token);
+            }
+          });
+        });
+        
+        function stripeTokenHandler(token) {
+          var form = document.getElementById('payment-form');
+          var hiddenInput = document.createElement('input');
+          hiddenInput.setAttribute('type', 'hidden');
+          hiddenInput.setAttribute('name', 'stripeToken');
+          hiddenInput.setAttribute('value', token.id);
+          form.appendChild(hiddenInput);
+        
+          // Submit the form
+          form.submit();
+        }
+        </script>
+        
+</body>
+</html>

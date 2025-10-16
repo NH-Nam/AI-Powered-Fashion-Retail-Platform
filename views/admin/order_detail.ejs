@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <%- include('css') %>
+    <% path='order'%>
+</head>
+
+<body>
+    <div class="container-scroller">
+        <!-- partial:partials/_sidebar.html -->
+        <%- include('siderbar') %>
+        <!-- header -->
+        <%- include('header') %>
+        <!-- body -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <div class="div_center">
+                    <h2>Order Detail</h2>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>Full Name</th>
+                                <td><%= order.name%></td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td><%= order.email%></td>
+                            </tr>
+                            <tr>
+                                <th>Phone Number</th>
+                                <td><%= order.phone%></td>
+                            </tr>
+                            <tr>
+                                <th>Address</th>
+                                <td><%= order.address%></td>
+                            </tr>
+                        </table>
+                        <p>
+                            <a href="/order">Back to list</a>
+                        </p>
+                    </div>
+                    <div class="col-md-7">
+                        <table class="table mb-0 align-middle text-nowrap table-responsive">
+                            <thead class="border">
+                                <tr>
+                                    <th class="border-top-0">No</th>
+                                    <th class="border-top-0">Title</th>
+                                    <th class="border-top-0">Thumbnail</th>
+                                    <th class="border-top-0">Price</th>
+                                    <th class="border-top-0">Number</th>
+                                    <th class="border-top-0">Total Price</th>
+                                </tr>
+                            </thead>
+                            <tbody class="border">
+                                <% var total_money =0; var index=1; for(var detail of details) {%>
+                                <tr>
+                                    <td><%= index++%></td>
+                                    <td><%= detail.product_id.title%></td>
+                                    <td><img src="<%= detail.product_id.image%>" style="height: 150px; width:150px; border:none;">
+                                    </td>
+                                    <td><%= numberFormat(detail.price)%></td>
+                                    <td><%= detail.num%></td>
+                                    <td><%= numberFormat(detail.total_money)%> VND</td>
+                                </tr>
+                                <% total_money +=detail.total_money; }%>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td><b>Total Money</b></td>
+                                    <td><b><%= numberFormat(total_money)%> VND</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        <!-- end body -->
+        <!-- plugins:js -->
+        <%- include('script') %>
+        <!-- End custom js for this page -->
+    </div>
+</body>
+
+</html>

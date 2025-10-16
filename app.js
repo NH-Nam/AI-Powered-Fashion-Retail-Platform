@@ -1,11 +1,30 @@
+require('dotenv').config();
+const MONGODB_URI = process.env.MONGODB_URI;
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+// 1A. config location of routers
+//router frontend (user)
+var homeRouter = require('./routes/home');
+//router backend (admin)
+var adminRouter = require('./routes/admin');
+var categoryRouter = require('./routes/category');
+var productRouter = require('./routes/product');
+var uploadRouter = require('./routes/apiUpload');
+var userRouter = require('./routes/user');
+var orderRouter = require('./routes/order');
+var feedRouter = require('./routes/feedback');
+var chatRouter = require('./routes/chatbot');
+var warehouseRouter = require('./routes/warehouse');
+
+//router auth
+var authRouter = require('./routes/auth');
+
+//cấu hình session alert
+const session = require('express-session');
 
 var app = express();
 
@@ -13,15 +32,44 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+// 2. config 'mongoose' module
+var mongoose = require('mongoose');
+var uri = process.env.MONGODB_URI || "mongodb+srv://long3907:mwTxAR6YzyyxYaIT@demodb.kndwxsk.mongodb.net/ShopToys";
+mongoose.set('strictQuery', true); //ignore mongoose warning
+mongoose.connect(uri)
+  .then(() => console.log('Connect success'))
+  .catch(err => console.log('failed connect'));
+
+//3. config 'body-parser' module
+var bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded({ extended : true}))
+
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+//su dụng session alert
+app.use(session({
+  secret: 'long3907', // Thay thế bằng một key bí mật của riêng bạn
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Đặt là 'true' chỉ khi bạn đang sử dụng HTTPS
+}));
 
+//1B config route
+app.use('/', homeRouter);
+app.use('/category', categoryRouter);
+app.use('/product', productRouter);
+app.use('/user', userRouter);
+app.use('/', uploadRouter);
+app.use('/', authRouter);
+app.use('/admin', adminRouter);
+app.use('/order', orderRouter);
+app.use('/feedback', feedRouter);
+app.use('/chatbot', chatRouter);
+app.use('/warehouses', warehouseRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
@@ -37,5 +85,8 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+//4. config port (for cloud deployment)
+app.listen(process.env.PORT || 3001);
 
 module.exports = app;

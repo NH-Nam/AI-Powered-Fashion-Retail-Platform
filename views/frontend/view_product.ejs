@@ -1,0 +1,151 @@
+<form action="/seachProduct" style="text-align: center;" method="POST">
+    <input type="text" name="search" placeholder="Search for something" class="inputSearch" style="text-transform: none;">
+    <input type="submit" value="Search">
+ </form>
+ <div id="searchResults" class="search-results"></div>
+  <div class="row product">
+    <% for(let product of products) {%>
+     <div class="col-sm-6 col-md-4 col-lg-4">
+        <div class="box">
+           <div class="option_container">
+              <div class="options">
+                 <a href="/product_details/<%= product._id%>" class="option1">
+                   <%= product.title%>
+                 </a>
+                 <form action="/addcart/<%= product._id %>" method="POST">
+                    <input type="number" name="quantity" value="1" min="1" style="width:100px;" hidden>
+                    <input type="submit" value="Buy Now" class="option2" 
+                    <% if(token != null) { %>
+                      <%if(product.quantity > 0){%>
+                         onclick="addToCart()""
+                      <%}else {%>
+                         onclick="checkQuantity()"
+                      <%}%>
+                    <% } else { %> 
+                      onclick="checkToken()"
+                    <% } %>
+                    
+                    style="border-radius: 30px;">
+                 </form>
+              </div>
+           </div>
+           <div class="img-box">
+              <img src="<%= product.image%>" alt="">
+           </div>
+           <div class="detail-box">
+              <h5>
+                <%= product.title%>
+              </h5>
+
+              <% if(product.discount_price != 0) {%>
+              <h6 style="color:red;">
+                 Discount</br>
+                 <%= numberFormat(product.discount_price)%>
+              </h6>
+
+              <h6 style="text-decoration:line-through;">
+                 Price</br>
+                 <%= numberFormat(product.price)%>
+              </h6>
+              <% } else {%>
+
+              <h6>
+                 Price</br>
+                 <%= numberFormat(product.price)%>
+              </h6>
+
+              <% } %>
+           </div>
+        </div>
+     </div>
+     <% } %>
+  </div>
+  <div class="pagination justify-content-center">
+    <% for(let i = 1; i <= totalPages; i++) { %>
+       <a href="<%= path%>?page=<%= i %>" class="<%= i === page ? 'active' : '' %>"><%= i %></a>
+     <% } %>
+  </div>
+
+  <script>
+    //tìm kiếm
+    var token = "<%= token%>";
+    document.querySelector('.inputSearch').addEventListener('input', function(e) {
+          var searchVal = e.target.value.trim();
+          var productArea = document.querySelector('.product');
+          var searchResultsArea = document.getElementById('searchResults');
+ 
+          if(searchVal.length > 0) {
+             productArea.style.display = 'none';
+             fetch(`/searchProductAjax?search=${encodeURIComponent(searchVal)}`)
+             .then(response => response.json())
+             .then(data => {
+                var html = '';
+                data.forEach(product => {
+                   html += `
+                   <div class="col-sm-6 col-md-4 col-lg-4">
+                      <div class="box">
+                               <div class="option_container">
+                                  <div class="options">
+                                  <a href="/product_details/${product._id}" class="option1">
+                                     ${product.title}
+                                  </a>
+                                  <form action="/addcart/${product._id}" method="POST">
+                                     <input type="number" name="quantity" value="1" min="1" style="width:100px;" hidden>
+                                     <input type="submit" value="Buy Now" class="option2"
+                                     ${typeof token !== 'undefined' && token ? (product.quantity > 0 ? 'onclick="addToCart()"' : 'onclick="checkQuantity()"') : 'onclick="checkToken()"'}
+                                     style="border-radius: 30px;">
+                                  </form>
+                                  </div>
+                               </div>
+                               <div class="img-box">
+                                  <img src="${product.image}" alt="">
+                               </div>
+                               <div class="detail-box">
+                                  <h5>
+                                  ${product.title}
+                                  </h5>
+ 
+                                  ${product.discount_price != 0 ? `
+                                  <h6 style="color:red;">
+                                  Discount</br>
+                                  ${numberFormat(product.discount_price)}
+                                  </h6>
+ 
+                                  <h6 style="text-decoration:line-through;">
+                                  Price</br>
+                                  ${numberFormat(product.price)}
+                                  </h6>` : `
+                                  <h6>
+                                  Price</br>
+                                  ${numberFormat(product.price)}
+                                  </h6>
+                                  `}
+                               </div>
+                            </div>
+                            </div>`;
+                });
+                result = `<div class="row">${html}</div>`
+                searchResultsArea.innerHTML = result;
+                searchResultsArea.style.display = 'block';
+             });
+          } else {
+             productArea.style.display = 'flex'; // or whatever it originally was
+             searchResultsArea.style.display = 'none';
+             searchResultsArea.innerHTML = '';
+          }
+       });
+       function numberFormat(number) {
+          const formatter = new Intl.NumberFormat('en-US', {
+             maximumFractionDigits: 2,
+             useGrouping: true,
+          });
+ 
+          let formattedNumber = formatter.format(number);
+          // Loại bỏ phần thập phân nếu nó chỉ là .00
+          if (formattedNumber.endsWith('.00')) {
+             formattedNumber = formattedNumber.substring(0, formattedNumber.length - 3);
+          }
+ 
+          return formattedNumber;
+       }
+ </script>

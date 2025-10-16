@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <%- include('css') %>
+    <% path='product'%>
+    <style>
+      .table-compact { table-layout: fixed; width: 100%; }
+      .table-compact th, .table-compact td { padding: 6px 8px; font-size: 12px; white-space: normal; word-break: break-word; overflow: hidden; text-overflow: ellipsis; vertical-align: top; }
+      .table-compact thead th { position: sticky; top: 0; background: rgba(0,0,0,0.2); z-index: 1; }
+      .product-img { height: 48px; width: 48px; border-radius: 4px; object-fit: cover; }
+      .materials-list { margin: 0; padding-left: 0; list-style: none; }
+      .materials-list li { line-height: 1.2; }
+      .badges { display: flex; flex-wrap: wrap; gap: 2px; }
+      .badge { display: inline-block; padding: 2px 6px; border-radius: 10px; font-size: 10px; line-height: 1.4; border: 1px solid rgba(255,255,255,0.25); white-space: nowrap; }
+      .badge-material { background: rgba(0, 180, 216, 0.15); }
+      .badge-season { background: rgba(76, 175, 80, 0.15); }
+      .btn-sm { padding: 4px 8px; font-size: 12px; }
+      /* Column width hints (percentages total 100%) */
+      .col-no { width: 3%; white-space: nowrap; }
+      .col-title { width: 12%; }
+      .col-image { width: 5%; white-space: nowrap; }
+      .col-category { width: 7%; }
+      .col-brand { width: 6%; }
+      .col-variants { width: 8%; white-space: nowrap; }
+      .col-material { width: 11%; }
+      .col-style { width: 5%; white-space: nowrap; }
+      .col-gender { width: 5%; white-space: nowrap; }
+      .col-season { width: 9%; }
+      .col-price { width: 6%; white-space: nowrap; }
+      .col-discount { width: 6%; white-space: nowrap; }
+      .col-qty { width: 6%; white-space: nowrap; }
+      .col-updated { width: 7%; white-space: nowrap; }
+      .col-action { width: 5%; white-space: nowrap; }
+    </style>
+</head>
+
+<body>
+    <div class="container-scroller">
+        <!-- partial:partials/_sidebar.html -->
+        <%- include('siderbar') %>
+        <!-- header-->
+        <%- include('header') %>
+        <!-- End hear-->
+        <!-- body -->
+        <div class="main-panel">
+            <div class="content-wrapper">
+                <% if (message) { %>
+                    <div class="alert alert-<%= message.type %>">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">x</button>
+                        <%= message.content %>
+                    </div>
+                <% } %>
+                <div class="div_center">
+                  <h1>Manage Product</h1>
+      
+                </div>
+                <div class="div_center">
+                    <a href="/product/add" class="btn btn-primary">Add Product</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-compact">
+                        <thead>
+                            <tr>
+                                <th class="col-no">No.</th>
+                                <th class="col-title">Title</th>
+                                <th class="col-image">Image</th>
+                                <th class="col-category">Gender</th>
+                                <th class="col-brand">Brand</th>
+                                <th class="col-variants">Variants</th>
+                                <th class="col-material">Material</th>
+                                <th class="col-style">Style</th>
+                                <th class="col-season">Season</th>
+                                 <th class="col-price">Sell Price</th>
+                                 <th class="col-price">Buy Price</th>
+                                <th class="col-discount">Discount</th>
+                                <th class="col-qty">Quantity</th>
+                                <th class="col-updated">Updated</th>
+                                <th class="col-action">Action</th>
+                            </tr>
+                        </thead>
+                         <tbody class="border">
+                         <%  var index=1; for(let product of products) { %>
+                              <tr data-toggle="collapse" data-target="#v-<%= product._id %>" style="cursor:pointer;">
+                                  <td class="col-no"><%= index++ %></td>
+                                  <td class="col-title"><%= product.title %></td>
+                                  <td class="col-image"><img src="<%= product.image %>" class="product-img"></td>
+                                  <td class="col-category"><%= product.gender || (product.category && product.category.name) || '-' %></td>
+                                  <td class="col-brand"><%= product.brand || '-' %></td>
+                                   <td class="col-variants">
+                                       <% const variantCount = (product.variants && product.variants.length) ? product.variants.length : (product.size || product.color ? 1 : 0); %>
+                                       <span class="badge"><%= variantCount %> variants</span>
+                                   </td>
+                                  <td class="col-material">
+                                      <% if (product.materials && product.materials.length) { %>
+                                          <div class="badges">
+                                              <% 
+                                              const materialTranslations = {
+                                                  'cotton': 'Bông (Cotton)',
+                                                  'polyester': 'Polyester',
+                                                  'wool': 'Len (Wool)',
+                                                  'silk': 'Lụa (Silk)',
+                                                  'linen': 'Vải lanh (Linen)',
+                                                  'denim': 'Vải bò (Denim)',
+                                                  'leather': 'Da (Leather)',
+                                                  'suede': 'Da lộn (Suede)',
+                                                  'synthetic': 'Sợi tổng hợp (Synthetic)',
+                                                  'blend': 'Hỗn hợp (Blend)',
+                                                  'rayon': 'Rayon',
+                                                  'nylon': 'Nylon',
+                                                  'spandex': 'Spandex',
+                                                  'acrylic': 'Acrylic'
+                                              };
+                                              product.materials.forEach(function(m){ 
+                                                  const translation = materialTranslations[(m.material || '').toLowerCase()] || m.material || '-';
+                                              %>
+                                                  <span class="badge badge-material"><%= translation %><%= m.percentage ? ' ('+ m.percentage +'%)' : '' %></span>
+                                              <% }) %>
+                                          </div>
+                                      <% } else { %>
+                                          -
+                                      <% } %>
+                                  </td>
+                                  <td class="col-style"><%= product.style || '-' %></td>
+                                  <td class="col-season">
+                                      <% if (product.seasons && product.seasons.length) { %>
+                                          <div class="badges">
+                                              <% product.seasons.forEach(function(s){ %>
+                                                  <span class="badge badge-season"><%= s %></span>
+                                              <% }) %>
+                                          </div>
+                                      <% } else { %>
+                                          <%= product.season || '-' %>
+                                      <% } %>
+                                  </td>
+                                   <td class="col-price"><%= numberFormat(product.price || 0) %> VND</td>
+                                   <td class="col-price"><%= numberFormat(product.buy_price || 0) %> VND</td>
+                                   <td class="col-discount"><%= numberFormat(product.discount_price || 0) %> VND</td>
+                                   <td class="col-qty">
+                                       <% const totalQty = (product.variants && product.variants.length) ? product.variants.reduce((sum,v)=> sum + (parseInt(v.quantity,10)||0), 0) : product.quantity; %>
+                                       <%= totalQty %>
+                                       <% if (inventoryByProduct && inventoryByProduct[String(product._id)] && inventoryByProduct[String(product._id)].length) { %>
+                                         <div style="margin-top:4px; font-size:11px; opacity:0.9;">
+                                           <% inventoryByProduct[String(product._id)].forEach(function(row, idx){ %>
+                                             <div><span class="badge"><%= row.code || row.name %></span> <%= row.quantity %></div>
+                                           <% }) %>
+                                         </div>
+                                       <% } %>
+                                   </td>
+                                  <td class="col-updated"><%= formatDate(product.updated_at) %></td>
+                                  <td class="col-action">
+                                      <a href="/product/edit/<%= product._id %>" button class="btn btn-warning btn-sm" style="margin-right:6px;">Edit</a>
+                                      <a onclick="return confirm('Are You Sure to delete this?')" href="/product/delete/<%= product._id %>"
+                                      class="btn btn-danger btn-sm">Delete</a>
+                                  </td>
+                               </tr>
+                               <tr id="v-<%= product._id %>" class="collapse">
+                                   <td colspan="15" style="background: rgba(255,255,255,0.04);">
+                                       <div style="padding:8px 6px;">
+                                           <div style="font-weight:600; margin-bottom:6px;">Variants</div>
+                                           <% if (product.variants && product.variants.length) { %>
+                                               <table class="table table-sm" style="margin-bottom:0;">
+                                                   <thead>
+                                                       <tr>
+                                                           <th style="width:20%;">Size</th>
+                                                           <th style="width:20%;">Color</th>
+                                                           <th style="width:20%;">Quantity</th>
+                                                       </tr>
+                                                   </thead>
+                                                   <tbody>
+                                                       <% product.variants.forEach(function(v){ %>
+                                                           <tr>
+                                                               <td><%= v.size || '-' %></td>
+                                                               <td><%= v.color || '-' %></td>
+                                                               <td><%= v.quantity || 0 %></td>
+                                                           </tr>
+                                                       <% }) %>
+                                                   </tbody>
+                                               </table>
+                                           <% } else { %>
+                                               <div style="opacity:0.8;">No variants. Using legacy fields.</div>
+                                           <% } %>
+                                       </div>
+                                   </td>
+                               </tr>
+                        <% } %>
+                      </tbody>
+                  </table>
+      
+            </div>
+          </div>
+        </div>
+        <!-- End body -->
+        <!-- plugins:js -->
+        <%- include('script') %>
+        <!-- End custom js for this page -->
+    </div>
+</body>
+
+</html>

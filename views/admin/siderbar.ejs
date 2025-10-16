@@ -1,0 +1,137 @@
+<nav class="sidebar sidebar-offcanvas" id="sidebar">
+    <div class="sidebar-brand-wrapper d-none d-lg-flex align-items-center justify-content-center fixed-top">
+    <a class="sidebar-brand brand-logo" href="/admin"><img src="../../themes/frontend/images/logoAdmin.gif" alt="logo" /></a>
+      <a class="sidebar-brand brand-logo-mini" href="/admin"><img src="../../themes/frontend/images/logoAdmin.gif" alt="logo" /></a>
+    </div>
+    <ul class="nav">
+      <li class="nav-item profile">
+        <div class="profile-desc">
+          <div class="profile-pic">
+            <div class="count-indicator">
+                <img class="img-xs rounded-circle " src="<%= (user.image !='') ? user.image : '../../themes/frontend/images/user.png' %>" alt="">
+              <span class="count bg-success"></span>
+            </div>
+            <div class="profile-name">
+              <h5 class="mb-0 font-weight-normal"><%= user.name%></h5>
+              <span>Admin</span>
+            </div>
+          </div>
+          <a href="#" id="profile-dropdown" data-toggle="dropdown"><i class="mdi mdi-dots-vertical"></i></a>
+          <div class="dropdown-menu dropdown-menu-right sidebar-dropdown preview-list" aria-labelledby="profile-dropdown">
+            <a href="/user/edit/<%= user._id%>" class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-dark rounded-circle">
+                  <i class="mdi mdi-settings text-primary"></i>
+                </div>
+              </div>
+              <div class="preview-item-content">
+                <p class="preview-subject ellipsis mb-1 text-small">Account settings</p>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="/user" class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-dark rounded-circle">
+                  <i class="mdi mdi-calendar-today text-success"></i>
+                </div>
+              </div>
+              <div class="preview-item-content">
+                <p class="preview-subject ellipsis mb-1 text-small">To-do list</p>
+              </div>
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="/" class="dropdown-item preview-item">
+              <div class="preview-thumbnail">
+                <div class="preview-icon bg-dark rounded-circle">
+                  <i class="mdi mdi-onepassword  text-info"></i>
+                </div>
+              </div>
+              <div class="preview-item-content">
+                <p class="preview-subject ellipsis mb-1 text-small">Back to User page</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </li>
+      <li class="nav-item nav-category">
+        <span class="nav-link">Navigation</span>
+      </li>
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='redirect') ? 'active' : '' %>" data-path="redirect">
+        <a class="nav-link" href="/admin">
+          <span class="menu-icon">
+            <i class="mdi mdi-speedometer"></i>
+          </span>
+          <span class="menu-title">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='category') ? 'active' : '' %>" data-path="category">
+        <a class="nav-link" href="/category">
+          <span class="menu-icon">
+            <i class="mdi mdi-playlist-play"></i>
+          </span>
+          <span class="menu-title">Category</span>
+        </a>
+      </li>
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='product') ? 'active' : '' %>" data-path="product">
+        <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="<%= (typeof path!=='undefined' && path==='product') ? 'true' : 'false' %>" aria-controls="ui-basic">
+          <span class="menu-icon">
+            <i class="mdi mdi-laptop"></i>
+          </span>
+          <span class="menu-title">Products</span>
+          <i class="menu-arrow"></i>
+        </a>
+        <div class="collapse<%= (typeof path!=='undefined' && path==='product') ? ' show' : '' %>" id="ui-basic">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> <a class="nav-link" href="/product/add">Add Product</a></li>
+            <li class="nav-item"> <a class="nav-link" href="/product">Show Product</a></li>
+          </ul>
+        </div>
+      </li>
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='order') ? 'active' : '' %>" data-path="order">
+        <a class="nav-link" href="/order">
+          <span class="menu-icon">
+            <i class="mdi mdi-table-large"></i>
+          </span>
+          <span class="menu-title">Orders</span>
+        </a>
+      </li>
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='feedback') ? 'active' : '' %>" data-path="feedback">
+        <a class="nav-link" href="/feedback">
+          <span class="menu-icon">
+            <i class="mdi mdi-contacts"></i>
+          </span>
+          <span class="menu-title">Feedback</span>
+        </a>
+      </li>
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='warehouses') ? 'active' : '' %>" data-path="warehouses">
+        <a class="nav-link" href="/warehouses/admin">
+          <span class="menu-icon">
+            <i class="mdi mdi-warehouse"></i>
+          </span>
+          <span class="menu-title">Warehouses</span>
+        </a>
+      </li>
+      <li class="nav-item menu-items <%= (typeof path!=='undefined' && path==='user') ? 'active' : '' %>" data-path="user">
+        <a class="nav-link" href="/user">
+          <span class="menu-icon">
+            <i class="mdi mdi-security"></i>
+          </span>
+          <span class="menu-title">User</span>
+        </a>
+      </li>
+    </ul>
+    <style>
+      /* Ensure only li.active controls the highlight */
+      #sidebar .menu-items .nav-link.active { background: transparent !important; }
+      #sidebar .menu-items.active > .nav-link { background: rgba(255,255,255,0.06); }
+      /* Remove focus highlight that may persist from previous page */
+      #sidebar .menu-items > .nav-link:focus { background: transparent !important; outline: none !important; box-shadow: none !important; }
+      #sidebar .menu-items > .nav-link:focus::before { opacity: 0 !important; }
+    </style>
+    <script>
+      // On load, if a sidebar item kept keyboard focus, blur it to avoid dual highlight
+      (function(){
+        try { if (document.activeElement && document.activeElement.closest && document.activeElement.closest('#sidebar')) { document.activeElement.blur(); } } catch(e) {}
+      })();
+    </script>
+  </nav>
